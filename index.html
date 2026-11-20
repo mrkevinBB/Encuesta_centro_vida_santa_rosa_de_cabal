@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Encuesta de Satisfacción - Programa Centro Día/Vida - Santa Rosa de Cabal</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS para exportación real a Excel (.xlsx) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              50: '#f0f4f8',
+              100: '#d9e2ec',
+              200: '#bcccdc',
+              700: '#1e3a5f',
+              800: '#102a43',
+              900: '#0a192f',
+            },
+            emeraldInst: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Estilos de accesibilidad y controles táctiles grandes */
+    body {
+      background-color: #f4f7f9;
+      color: #102a43;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Botones de selección tipo radio accesibles */
+    .option-pill input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .option-pill label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 48px;
+      padding: 0.65rem 0.75rem;
+      border-radius: 0.75rem;
+      border: 2px solid #cbd5e1;
+      background-color: #ffffff;
+      color: #1e293b;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      user-select: none;
+    }
+
+    .option-pill label:hover {
+      border-color: #059669;
+      background-color: #f0fdf4;
+    }
+
+    /* Colores semánticos al seleccionar calificación */
+    .option-pill input[type="radio"]:checked + label {
+      border-color: #047857;
+      background-color: #047857;
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(4, 120, 87, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .option-pill[data-val="Muy malo"] input[type="radio"]:checked + label {
+      border-color: #b91c1c;
+      background-color: #dc2626;
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
+    }
+
+    .option-pill[data-val="Malo"] input[type="radio"]:checked + label {
+      border-color: #c2410c;
+      background-color: #ea580c;
+      box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
+    }
+
+    .option-pill[data-val="Aceptable"] input[type="radio"]:checked + label {
+      border-color: #b45309;
+      background-color: #d97706;
+      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.25);
+    }
+
+    .option-pill[data-val="Bueno"] input[type="radio"]:checked + label {
+      border-color: #0369a1;
+      background-color: #0284c7;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+    }
+
+    .option-pill[data-val="No aplica"] input[type="radio"]:checked + label {
+      border-color: #475569;
+      background-color: #64748b;
+      box-shadow: 0 4px 10px rgba(100, 116, 139, 0.25);
+    }
+
+    .option-pill input[type="radio"]:focus-visible + label {
+      outline: 3px solid #102a43;
+      outline-offset: 2px;
+    }
+
+    /* Animación suave para notificaciones */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .toast-animate {
+      animation: slideInUp 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- BARRA SUPERIOR DE HERRAMIENTAS Y EXPORTACIÓN -->
+  <header class="sticky top-0 z-30 bg-navy-900 text-white shadow-lg border-b border-navy-700">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Identidad rápida -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emeraldInst-600 flex items-center justify-center font-extrabold text-lg shadow-inner shrink-0">
+          CD
+        </div>
+        <div>
+          <span class="text-xs uppercase tracking-wider text-emerald-300 font-bold block">Santa Rosa de Cabal</span>
+          <span class="text-sm sm:text-base font-bold leading-tight">Centro Día/Vida · Encuesta 2025</span>
+        </div>
+      </div>
+
+      <!-- Botones de acción principales -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+        <!-- Botón de Registros Guardados -->
+        <button
+          type="button"
+          id="btnOpenRecords"
+          class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-navy-800 hover:bg-navy-700 border border-navy-200/20 text-white font-semibold text-sm transition cursor-pointer"
+          title="Ver encuestas almacenadas en este dispositivo"
+        >
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Registros</span>
+          <span id="badgeCount" class="inline-flex items-center justify-center px-2.5 py-0.5 text-xs font-extrabold rounded-full bg-emeraldInst-600 text-white">
+            0
+          </span>
+        </button>
+
+        <!-- Botón Descargar Excel -->
+        <button
+          type="button"
+          id="btnExportExcel"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emeraldInst-600 hover:bg-emeraldInst-700 active:scale-[0.99] text-white font-bold text-sm shadow-md transition cursor-pointer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Descargar Excel (.xlsx)</span>
+        </button>
+
+        <!-- Botón Configuración Google Forms / Sheets -->
+        <button
+          type="button"
+          id="btnOpenCloud"
+          class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition cursor-pointer"
+          title="Conectar con Google Forms o Google Sheets"
+        >
+          <svg class="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+          </svg>
+          <span class="hidden md:inline">Google Forms / Sheets</span>
+          <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-slate-400" title="Sin conexión a la nube"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 sm:py-8">
+
+    <!-- TARJETA DE ENCABEZADO INSTITUCIONAL -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+      <div class="bg-gradient-to-r from-navy-800 via-navy-700 to-emeraldInst-800 px-6 py-7 sm:px-8 text-white">
+        <div class="inline-block px-3 py-1 rounded-full bg-white/15 text-emerald-200 text-xs sm:text-sm font-bold tracking-wide uppercase mb-2">
+          Alcaldía Municipal · Atención Integral al Adulto Mayor
+        </div>
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-snug">
+          PROGRAMA CENTRO DÍA/VIDA – SANTA ROSA DE CABAL
+        </h1>
+        <h2 class="text-base sm:text-lg font-bold text-emerald-200 mt-1">
+          ENCUESTA DE MEDICIÓN DE LA SATISFACCIÓN DEL USUARIO
+        </h2>
+      </div>
+      <div class="p-6 sm:px-8 bg-emeraldInst-50/50 border-t border-emeraldInst-100">
+        <p class="text-base sm:text-lg text-navy-800 leading-relaxed font-medium">
+          Lo invitamos a participar en esta encuesta para medir la satisfacción del usuario frente al programa Centro Día/Vida, la cual nos permitirá evaluar los servicios que se ofrecen a las personas mayores y mejorar continuamente.
+        </p>
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+          <span>Los campos marcados con <strong class="text-red-600">*</strong> son obligatorios.</span>
+          <span id="currentSurveyNumber" class="font-bold text-navy-800 bg-white px-3 py-1 rounded-lg border border-slate-200">
+            Encuesta N.° 1
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORMULARIO DE LA ENCUESTA -->
+    <form id="surveyForm" novalidate class="space-y-6">
+
+      <!-- CAMPO INICIAL OBLIGATORIO -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+        <label for="tiempoAsistencia" class="block text-lg sm:text-xl font-bold text-navy-900 mb-3">
+          Cuánto tiempo lleva asistiendo al Centro Día/Vida: <span class="text-red-600">*</span>
+        </label>
+        <input
+          type="text"
+          id="tiempoAsistencia"
+          name="tiempoAsistencia"
+          required
+          placeholder="Ejemplo: 6 meses, 2 años, 3 semanas..."
+          class="w-full text-lg px-4 py-3.5 rounded-xl border-2 border-slate-300 focus:border-emeraldInst-600 focus:ring-4 focus:ring-emeraldInst-600/15 outline-none transition bg-slate-50 focus:bg-white text-navy-900 font-medium"
+        />
+        <p id="error-tiempoAsistencia" class="hidden mt-2 text-sm font-semibold text-red-600">
+          Por favor, escriba cuánto tiempo lleva asistiendo al Centro Día/Vida.
+        </p>
+      </section>
+
+      <!-- CONTENEDOR DINÁMICO DE LAS SECCIONES 1 A 7 -->
+      <div id="sectionsContainer" class="space-y-6"></div>
+
+      <!-- SECCIÓN 8: SUGERENCIAS -->
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-navy-800 px-6 py-4 text-white">
+          <h3 class="text-lg sm:text-xl font-bold leading-snug">
+            8. ¿Tiene alguna sugerencia para mejorar el servicio prestado en el Centro Día/Vida? <span class="text-emerald-300">*</span>
+          </h3>
+        </div>
+        <div class="p-6 sm:p-8 space-y-5">
+          <div class="grid grid-cols-2 sm:max-w-xs gap-3">
+            <div class="option-pill" data-val="Si">
+              <input type="radio" id="s8_si" name="tieneSugerencia" value="Si" />
+              <label for="s8_si" class="text-base sm:text-lg">Sí</label>
+            </div>
+            <div class="option-pill" data-val="No">
+              <input type="radio" id="s8_no" name="tieneSugerencia" value="No" />
+              <label for="s8_no" class="text-base sm:text-lg">No</label>
+            </div>
+          </div>
+          <p id="error-tieneSugerencia" class="hidden text-sm font-semibold text-red-600">
+            Por favor, seleccione Sí o No.
+          </p>
+
+          <div id="sugerenciaTextoWrapper" class="transition-all duration-200">
+            <label for="cualSugerencia" class="block text-base sm:text-lg font-bold text-navy-900 mb-2">
+              ¿Cuál?
+            </label>
+            <textarea
+              id="cualSugerencia"
+              name="cualSugerencia"
+              rows="4"
+              placeholder="Escriba aquí las observaciones, felicitaciones o sugerencias del usuario..."
+              class="w-full text-base sm:text-lg p-4 rounded-xl border-2 border-slate-300 focus:border-emeraldInst-600 focus:ring-4 focus:ring-emeraldInst-600/15 outline-none transition bg-slate-50 focus:bg-white text-navy-900"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOTONES DE ACCIÓN DEL FORMULARIO -->
+      <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <button
+          type="button"
+          id="btnResetForm"
+          class="w-full sm:w-auto px-6 py-4 rounded-xl border-2 border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-base transition cursor-pointer"
+        >
+          Limpiar formulario
+        </button>
+
+        <button
+          type="submit"
+          id="btnSubmitSurvey"
+          class="w-full sm:w-auto flex-1 sm:max-w-md flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-emeraldInst-600 hover:bg-emeraldInst-700 active:scale-[0.99] text-white font-extrabold text-lg sm:text-xl shadow-lg shadow-emeraldInst-600/25 transition cursor-pointer"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <span>Guardar Encuesta</span>
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="bg-navy-900 text-slate-300 py-6 px-4 mt-12 text-center text-sm">
+    <p class="font-semibold text-white">Programa Centro Día/Vida – Santa Rosa de Cabal</p>
+    <p class="mt-1 text-slate-400">Los datos se almacenan localmente en su navegador para garantizar continuidad sin conexión a internet.</p>
+  </footer>
+
+  <!-- NOTIFICACIÓN FLOTANTE (TOAST) -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md w-[calc(100%-2.5rem)] pointer-events-none"></div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 1: PANEL DE REGISTROS GUARDADOS Y RESPALDO JSON                   -->
+  <!-- ======================================================================= -->
+  <div id="modalRecords" class="fixed inset-0 z-50 hidden items-center justify-center bg-navy-900/70 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+      <!-- Header Modal -->
+      <div class="bg-navy-800 text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg sm:text-xl font-bold">Encuestas Guardadas en este Dispositivo</h3>
+          <p class="text-xs sm:text-sm text-slate-300">Revise, exporte o elimine registros individuales antes de descargar el Excel.</p>
+        </div>
+        <button type="button" id="btnCloseRecords" class="p-2 rounded-lg hover:bg-white/10 text-white cursor-pointer" aria-label="Cerrar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Barra de acciones del modal -->
+      <div class="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="text-sm font-bold text-navy-800">
+          Total acumulado: <span id="modalTotalCount" class="text-emeraldInst-700 text-base">0</span> encuestas
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btnExportJson" class="px-3.5 py-2 rounded-xl bg-navy-700 hover:bg-navy-800 text-white text-xs sm:text-sm font-semibold cursor-pointer transition">
+            Respaldo JSON
+          </button>
+          <button type="button" id="btnModalExportExcel" class="px-3.5 py-2 rounded-xl bg-emeraldInst-600 hover:bg-emeraldInst-700 text-white text-xs sm:text-sm font-bold cursor-pointer transition">
+            Descargar Excel (.xlsx)
+          </button>
+          <button type="button" id="btnClearAllRecords" class="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs sm:text-sm font-semibold cursor-pointer transition">
+            Vaciar base local
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirmación inline para vaciar base local (sin usar window.confirm) -->
+      <div id="confirmClearBanner" class="hidden px-6 py-4 bg-red-50 border-b border-red-200 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-sm font-bold text-red-800">
+          ¿Está seguro de eliminar TODAS las encuestas guardadas? Esta acción no se puede deshacer.
+        </p>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnCancelClear" class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-slate-700 text-sm font-semibold cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" id="btnConfirmClear" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-bold cursor-pointer">
+            Sí, eliminar todo
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla / Lista de registros -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <div id="recordsEmptyState" class="text-center py-12 text-slate-500">
+          <svg class="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <p class="text-base font-semibold">Aún no hay encuestas guardadas.</p>
+          <p class="text-sm mt-1">Complete el formulario y pulse "Guardar Encuesta" para agregar registros.</p>
+        </div>
+
+        <div id="recordsTableWrapper" class="hidden overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b-2 border-slate-200 text-xs uppercase text-slate-500 font-bold">
+                <th class="py-3 px-3">#</th>
+                <th class="py-3 px-3">Fecha y Hora</th>
+                <th class="py-3 px-3">Tiempo Asistencia</th>
+                <th class="py-3 px-3">Valoración General</th>
+                <th class="py-3 px-3">¿Recomienda?</th>
+                <th class="py-3 px-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="recordsTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 2: CONEXIÓN CON GOOGLE FORMS / GOOGLE SHEETS                      -->
+  <!-- ======================================================================= -->
+  <div id="modalCloud" class="fixed inset-0 z-50 hidden items-center justify-center bg-navy-900/70 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+      <!-- Header Modal -->
+      <div class="bg-navy-800 text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg sm:text-xl font-bold">Conexión con Google Forms / Google Sheets</h3>
+          <p class="text-xs sm:text-sm text-slate-300">Envíe automáticamente cada encuesta a la nube además de guardarla localmente.</p>
+        </div>
+        <button type="button" id="btnCloseCloud" class="p-2 rounded-lg hover:bg-white/10 text-white cursor-pointer" aria-label="Cerrar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Cuerpo Modal -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- Switch activar/desactivar -->
+        <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200">
+          <div>
+            <p class="font-bold text-navy-900">Sincronización automática en la nube</p>
+            <p class="text-xs text-slate-600">Al guardar una encuesta, se enviará una copia a su enlace configurado.</p>
+          </div>
+          <label class="inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="cloudEnabled" class="sr-only peer" />
+            <div class="relative w-12 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emeraldInst-600"></div>
+          </label>
+        </div>
+
+        <!-- Selector de modo -->
+        <div>
+          <label class="block text-sm font-bold text-navy-900 mb-2">Método de integración:</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button type="button" id="tabAppsScript" class="p-3.5 rounded-xl border-2 border-emeraldInst-600 bg-emeraldInst-50 text-left cursor-pointer">
+              <span class="font-bold text-navy-900 block text-sm">Opción A: Google Sheets (Apps Script)</span>
+              <span class="text-xs text-slate-600">Recomendado. Guarda todas las columnas directamente en una hoja de cálculo.</span>
+            </button>
+            <button type="button" id="tabGoogleForm" class="p-3.5 rounded-xl border-2 border-slate-200 bg-white text-left cursor-pointer">
+              <span class="font-bold text-navy-900 block text-sm">Opción B: Google Forms (formResponse)</span>
+              <span class="text-xs text-slate-600">Envía los datos directamente a un formulario de Google existente.</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PANEL OPCIÓN A: APPS SCRIPT -->
+        <div id="panelAppsScript" class="space-y-4">
+          <div>
+            <label for="appsScriptUrl" class="block text-sm font-bold text-navy-900 mb-1">
+              URL de la Aplicación Web (Google Apps Script):
+            </label>
+            <input
+              type="url"
+              id="appsScriptUrl"
+              placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-emeraldInst-600 outline-none text-sm"
+            />
+          </div>
+
+          <details class="bg-navy-50 rounded-xl p-4 border border-navy-100 text-sm">
+            <summary class="font-bold text-navy-800 cursor-pointer">
+              Ver guía rápida: ¿Cómo crear el enlace de Google Sheets en 2 minutos?
+            </summary>
+            <ol class="list-decimal list-inside mt-3 space-y-2 text-slate-700 text-xs sm:text-sm">
+              <li>Abra una hoja de cálculo nueva en <strong>Google Sheets</strong>.</li>
+              <li>En el menú superior vaya a <strong>Extensiones → Apps Script</strong>.</li>
+              <li>Borre el código existente y pegue el siguiente código:</li>
+            </ol>
+            <div class="relative mt-2">
+              <pre id="appsScriptSnippet" class="bg-navy-900 text-emerald-300 p-3 rounded-lg text-xs overflow-x-auto">function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  var keys = Object.keys(data);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(keys);
+  }
+  var row = keys.map(function(k) { return data[k]; });
+  sheet.appendRow(row);
+  return ContentService.createTextOutput(JSON.stringify({status: "ok"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+              <button type="button" id="btnCopyScript" class="mt-2 px-3 py-1.5 rounded-lg bg-navy-700 hover:bg-navy-800 text-white text-xs font-semibold cursor-pointer">
+                Copiar código de Apps Script
+              </button>
+            </div>
+            <ol start="4" class="list-decimal list-inside mt-3 space-y-1.5 text-slate-700 text-xs sm:text-sm">
+              <li>Haga clic en <strong>Implementar → Nueva implementación</strong>, elija tipo <strong>Aplicación web</strong>.</li>
+              <li>En "Quién tiene acceso", seleccione <strong>Cualquier persona</strong> y autorice los permisos.</li>
+              <li>Copie la URL generada (termina en <code>/exec</code>) y péguela arriba.</li>
+            </ol>
+          </details>
+        </div>
+
+        <!-- PANEL OPCIÓN B: GOOGLE FORMS -->
+        <div id="panelGoogleForm" class="hidden space-y-4">
+          <div>
+            <label for="googleFormUrl" class="block text-sm font-bold text-navy-900 mb-1">
+              URL de envío de Google Form (terminada en <code>/formResponse</code>):
+            </label>
+            <input
+              type="url"
+              id="googleFormUrl"
+              placeholder="https://docs.google.com/forms/d/e/1FAIpQLSc.../formResponse"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-emeraldInst-600 outline-none text-sm"
+            />
+          </div>
+
+          <details class="bg-navy-50 rounded-xl p-4 border border-navy-100 text-sm">
+            <summary class="font-bold text-navy-800 cursor-pointer">
+              ¿Cómo obtener la URL y los IDs (entry.XXXXX) de mi Google Form?
+            </summary>
+            <ul class="list-disc list-inside mt-2 space-y-1.5 text-slate-700 text-xs sm:text-sm">
+              <li>Abra su Google Form en modo edición, haga clic en los <strong>3 puntos (⋮) → Obtener enlace prellenado</strong>.</li>
+              <li>Llene respuestas de ejemplo y pulse <strong>Obtener enlace → Copiar enlace</strong>.</li>
+              <li>En ese enlace verá parámetros como <code>entry.123456789=Respuesta</code>.</li>
+              <li>Cambie <code>/viewform</code> por <code>/formResponse</code> en la URL principal y asigne cada <code>entry.XXXXX</code> abajo.</li>
+            </ul>
+          </details>
+
+          <div class="border border-slate-200 rounded-xl p-4 max-h-64 overflow-y-auto space-y-3 bg-slate-50">
+            <p class="text-xs font-bold text-navy-800 uppercase">Mapeo de campos (entry.ID):</p>
+            <div id="googleFormEntriesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Modal -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+        <button type="button" id="btnCancelCloud" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" id="btnSaveCloudConfig" class="px-5 py-2.5 rounded-xl bg-emeraldInst-600 hover:bg-emeraldInst-700 text-white font-bold text-sm cursor-pointer">
+          Guardar Configuración
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- LÓGICA JAVASCRIPT DE LA APLICACIÓN                                      -->
+  <!-- ======================================================================= -->
+  <script>
+    /**
+     * DEFINICIÓN ESTRUCTURADA DE LA ENCUESTA
+     * Contiene todas las secciones, preguntas y escalas exactas solicitadas.
+     */
+    const SCALE_STANDARD = ["Muy malo", "Malo", "Aceptable", "Bueno", "Excelente"];
+    const SCALE_TRANSPORT = ["Muy malo", "Malo", "Aceptable", "Bueno", "Excelente", "No aplica"];
+    const SCALE_YES_NO = ["SI", "NO"];
+    const SCALE_RECOMMEND = ["Si", "No", "No sabe", "No contesta"];
+
+    const SURVEY_SECTIONS = [
+      {
+        id: "sec1",
+        title: "1. Según su percepción, califique los siguientes aspectos referentes a la sede del Centro de Día/Vida",
+        subtitle: "Califique cada aspecto de Muy malo a Excelente.",
+        options: SCALE_STANDARD,
+        questions: [
+          { id: "1.1", text: "Orden y limpieza.", required: true },
+          { id: "1.2", text: "Equipamiento y confortabilidad de las instalaciones.", required: true },
+          { id: "1.3", text: "Organización y funcionamiento.", required: true },
+          { id: "1.4", text: "Horario de atención.", required: true },
+          { id: "1.5", text: "Medidas de seguridad para el ingreso y la salida.", required: true },
+          { id: "1.6", text: "Protección y seguridad que el centro ofrece.", required: true }
+        ]
+      },
+      {
+        id: "sec2",
+        title: "2. Califique los siguientes aspectos relacionados con el talento humano que interviene en la prestación de los servicios en el Centro de Día/Vida",
+        subtitle: "Califique cada aspecto de Muy malo a Excelente.",
+        options: SCALE_STANDARD,
+        questions: [
+          { id: "2.1", text: "Trato respetuoso y amable.", required: true },
+          { id: "2.2", text: "Empatía (capacidad de escucha y comprensión de los problemas personales).", required: true },
+          { id: "2.3", text: "Capacidad de resolución de problemas.", required: true },
+          { id: "2.4", text: "Agilidad con que se atienden sus necesidades.", required: true }
+        ]
+      },
+      {
+        id: "sec3",
+        title: "3. Califique los siguientes aspectos relacionados con el servicio de transporte del Centro de Día/Vida",
+        subtitle: "Si el usuario no utiliza el servicio de transporte, puede marcar 'No aplica' o dejar esta sección sin responder.",
+        options: SCALE_TRANSPORT,
+        questions: [
+          { id: "3.1", text: "Duración de la ruta (el tiempo que pasa en el vehículo).", required: false },
+          { id: "3.2", text: "Horario de recogida.", required: false },
+          { id: "3.3", text: "Estado del vehículo (limpieza, mantenimiento).", required: false },
+          { id: "3.4", text: "Seguridad durante el recorrido.", required: false },
+          { id: "3.5", text: "Adaptación y accesibilidad para abordar el vehículo.", required: false },
+          { id: "3.6", text: "Trato y actitud del personal de la ruta (conductor y coordinador de ruta).", required: false },
+          { id: "3.7", text: "El servicio del transporte en general.", required: false }
+        ]
+      },
+      {
+        id: "sec4",
+        title: "4. Califique los siguientes aspectos relacionados con el servicio de alimentación del Centro de Día/Vida",
+        subtitle: "Califique cada aspecto de Muy malo a Excelente.",
+        options: SCALE_STANDARD,
+        questions: [
+          { id: "4.1", text: "La alimentación que se ofrece (variedad del menú, sabor, presentación, cantidad).", required: true },
+          { id: "4.2", text: "Adaptación de las comidas a las necesidades personales.", required: true },
+          { id: "4.3", text: "Orden y limpieza del comedor.", required: true }
+        ]
+      },
+      {
+        id: "sec5",
+        title: "5. Indique su calificación para los siguientes aspectos referentes a la intervención y atención del usuario del programa Centro Día/Vida",
+        subtitle: "Califique cada aspecto de Muy malo a Excelente.",
+        options: SCALE_STANDARD,
+        questions: [
+          { id: "5.1", text: "Atención y cuidados de la salud (orientación de enfermería, asesoría médica, seguimiento al estado de salud, articulación con el sistema de salud).", required: true },
+          { id: "5.2", text: "Atención psicológica.", required: true },
+          { id: "5.3", text: "Atención y orientación psicosocial.", required: true },
+          { id: "5.4", text: "Actividad física (gimnasia diaria de mantenimiento y fortalecimiento, hidroterapia, caminata, club deportivo, talleres educativos teórico - prácticos).", required: true },
+          { id: "5.5", text: "Actividades sociales, culturales y recreativas.", required: true },
+          { id: "5.6", text: "Actividades productivas (manualidades, huerta, medio ambiente).", required: true },
+          { id: "5.7", text: "Actividades pedagógicas en nuevas tecnologías de la información (internet, uso del celular).", required: true },
+          { id: "5.8", text: "Talleres educativos ofrecidos por el talento humano.", required: true },
+          { id: "5.9", text: "Encuentros intergeneracionales y encuentros de familia.", required: true },
+          { id: "5.10", text: "Redes para el apoyo (voluntariado, bazar, canasta de la solidaridad, alimentación complementaria).", required: true }
+        ]
+      },
+      {
+        id: "sec6",
+        title: "6. Indique su afirmación o negación, frente a los posibles beneficios que la asistencia al Centro Día/Vida, ha podido tener en su vida cotidiana.",
+        subtitle: "Seleccione SI o NO para cada afirmación.",
+        options: SCALE_YES_NO,
+        questions: [
+          { id: "6.1", text: "Ha mejorado su autonomía e independencia.", required: true },
+          { id: "6.2", text: "Ha mejorado su estado de ánimo.", required: true },
+          { id: "6.3", text: "Se siente más apoyado.", required: true },
+          { id: "6.4", text: "Se siente más tranquilo.", required: true },
+          { id: "6.5", text: "Se siente más satisfecho con su vida.", required: true },
+          { id: "6.6", text: "Se ha relacionado con otras personas.", required: true },
+          { id: "6.7", text: "Ha adquirido nuevos conocimientos.", required: true },
+          { id: "6.8", text: "En general, su estado de salud, ha mejorado.", required: true },
+          { id: "6.9", text: "Ha sido beneficioso para su familia.", required: true }
+        ]
+      },
+      {
+        id: "sec7",
+        title: "7. De acuerdo con la experiencia que ha tenido como usuario del Centro Día/Vida, califique en general el servicio.",
+        subtitle: "Valoración global y recomendación del programa.",
+        options: null, // Opciones personalizadas por pregunta en esta sección
+        questions: [
+          {
+            id: "7.1",
+            text: "Valoración general del servicio.",
+            required: true,
+            customOptions: SCALE_STANDARD
+          },
+          {
+            id: "7.2",
+            text: "¿Recomendaría el servicio prestado por el Centro Día/Vida?",
+            required: true,
+            customOptions: SCALE_RECOMMEND
+          }
+        ]
+      }
+    ];
+
+    // Claves de almacenamiento en localStorage
+    const STORAGE_KEY_RECORDS = "centro_dia_vida_encuestas_2025";
+    const STORAGE_KEY_CLOUD = "centro_dia_vida_cloud_config_2025";
+
+    /**
+     * ESTADO GLOBAL DE LA APLICACIÓN
+     */
+    let savedSurveys = [];
+    let cloudConfig = {
+      enabled: false,
+      mode: "appsScript", // 'appsScript' | 'googleForm'
+      appsScriptUrl: "",
+      googleFormUrl: "",
+      entries: {}
+    };
+
+    /**
+     * INICIALIZACIÓN AL CARGAR LA PÁGINA
+     */
+    document.addEventListener("DOMContentLoaded", () => {
+      loadFromStorage();
+      renderSurveySections();
+      renderGoogleFormEntryInputs();
+      updateUIState();
+      bindEvents();
+    });
+
+    /**
+     * Carga encuestas y configuración de nube desde localStorage
+     */
+    function loadFromStorage() {
+      try {
+        const rawRecords = localStorage.getItem(STORAGE_KEY_RECORDS);
+        if (rawRecords) {
+          savedSurveys = JSON.parse(rawRecords);
+        }
+      } catch (e) {
+        console.error("Error leyendo encuestas de localStorage:", e);
+        savedSurveys = [];
+      }
+
+      try {
+        const rawCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
+        if (rawCloud) {
+          cloudConfig = { ...cloudConfig, ...JSON.parse(rawCloud) };
+        }
+      } catch (e) {
+        console.error("Error leyendo configuración de nube:", e);
+      }
+    }
+
+    /**
+     * Guarda las encuestas en localStorage
+     */
+    function persistSurveys() {
+      try {
+        localStorage.setItem(STORAGE_KEY_RECORDS, JSON.stringify(savedSurveys));
+      } catch (e) {
+        showToast("No se pudo guardar en el almacenamiento local del navegador.", "error");
+      }
+    }
+
+    /**
+     * Renderiza dinámicamente las secciones 1 a 7 con controles accesibles
+     */
+    function renderSurveySections() {
+      const container = document.getElementById("sectionsContainer");
+      container.innerHTML = "";
+
+      SURVEY_SECTIONS.forEach((section) => {
+        const sectionEl = document.createElement("section");
+        sectionEl.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden";
+
+        // Encabezado de sección
+        const headerHtml = `
+          <div class="bg-navy-800 px-6 py-4 text-white">
+            <h3 class="text-lg sm:text-xl font-bold leading-snug">${section.title}</h3>
+            ${section.subtitle ? `<p class="text-xs sm:text-sm text-emerald-200 mt-1">${section.subtitle}</p>` : ""}
+          </div>
+        `;
+
+        // Cuerpo de preguntas
+        let questionsHtml = `<div class="divide-y divide-slate-200">`;
+
+        section.questions.forEach((q, idx) => {
+          const opts = q.customOptions || section.options;
+          const fieldName = `q_${q.id.replace(".", "_")}`;
+          const bgClass = idx % 2 === 1 ? "bg-slate-50/60" : "bg-white";
+
+          // Definir columnas de rejilla según cantidad de opciones
+          let gridColsClass = "grid-cols-2 sm:grid-cols-5";
+          if (opts.length === 2) gridColsClass = "grid-cols-2 sm:max-w-xs";
+          else if (opts.length === 4) gridColsClass = "grid-cols-2 sm:grid-cols-4";
+          else if (opts.length === 6) gridColsClass = "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6";
+
+          const pillsHtml = opts
+            .map((opt, optIdx) => {
+              const inputId = `${fieldName}_opt_${optIdx}`;
+              return `
+                <div class="option-pill" data-val="${opt}">
+                  <input type="radio" id="${inputId}" name="${fieldName}" value="${opt}" />
+                  <label for="${inputId}">${opt}</label>
+                </div>
+              `;
+            })
+            .join("");
+
+          questionsHtml += `
+            <div id="block-${fieldName}" class="p-5 sm:px-8 sm:py-6 ${bgClass} transition-colors">
+              <div class="mb-3.5 flex items-start justify-between gap-2">
+                <p class="text-base sm:text-lg font-semibold text-navy-900 leading-snug">
+                  <span class="inline-block font-extrabold text-emeraldInst-700 mr-1.5">${q.id}</span>
+                  ${q.text}
+                  ${q.required ? '<span class="text-red-600 font-bold ml-1">*</span>' : '<span class="text-xs font-normal text-slate-500 ml-1">(Opcional)</span>'}
+                </p>
+              </div>
+              <div class="grid ${gridColsClass} gap-2.5">
+                ${pillsHtml}
+              </div>
+              <p id="error-${fieldName}" class="hidden mt-2 text-sm font-semibold text-red-600">
+                Por favor, seleccione una opción para este aspecto.
+              </p>
+            </div>
+          `;
+        });
+
+        questionsHtml += `</div>`;
+        sectionEl.innerHTML = headerHtml + questionsHtml;
+        container.appendChild(sectionEl);
+      });
+    }
+
+    /**
+     * Genera los inputs para mapear entry.IDs de Google Forms en el modal de nube
+     */
+    function renderGoogleFormEntryInputs() {
+      const container = document.getElementById("googleFormEntriesContainer");
+      const allFields = [
+        { key: "tiempoAsistencia", label: "Tiempo de asistencia" }
+      ];
+
+      SURVEY_SECTIONS.forEach((sec) => {
+        sec.questions.forEach((q) => {
+          allFields.push({ key: q.id, label: `${q.id} ${q.text.substring(0, 42)}...` });
+        });
+      });
+
+      allFields.push({ key: "tieneSugerencia", label: "8. ¿Tiene sugerencia? (Si/No)" });
+      allFields.push({ key: "cualSugerencia", label: "8. ¿Cuál sugerencia?" });
+
+      container.innerHTML = allFields
+        .map(
+          (f) => `
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 truncate mb-1" title="${f.label}">${f.label}</label>
+            <input
+              type="text"
+              data-entry-key="${f.key}"
+              value="${cloudConfig.entries[f.key] || ""}"
+              placeholder="entry.123456789"
+              class="cloud-entry-input w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
+            />
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    /**
+     * Actualiza contadores, indicadores de nube y consecutivo en pantalla
+     */
+    function updateUIState() {
+      const count = savedSurveys.length;
+      document.getElementById("badgeCount").textContent = count;
+      document.getElementById("modalTotalCount").textContent = count;
+
+      const nextConsecutive = count > 0 ? Math.max(...savedSurveys.map((s) => s.consecutivo)) + 1 : 1;
+      document.getElementById("currentSurveyNumber").textContent = `Encuesta N.° ${nextConsecutive}`;
+
+      // Estado visual de nube
+      const dot = document.getElementById("cloudStatusDot");
+      if (cloudConfig.enabled && (cloudConfig.appsScriptUrl || cloudConfig.googleFormUrl)) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/40";
+        dot.title = "Sincronización en la nube activa";
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-slate-400";
+        dot.title = "Solo almacenamiento local";
+      }
+
+      renderRecordsTable();
+    }
+
+    /**
+     * Renderiza la tabla de encuestas guardadas dentro del Modal de Registros
+     */
+    function renderRecordsTable() {
+      const emptyState = document.getElementById("recordsEmptyState");
+      const tableWrapper = document.getElementById("recordsTableWrapper");
+      const tbody = document.getElementById("recordsTableBody");
+
+      if (savedSurveys.length === 0) {
+        emptyState.classList.remove("hidden");
+        tableWrapper.classList.add("hidden");
+        tbody.innerHTML = "";
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      tableWrapper.classList.remove("hidden");
+
+      tbody.innerHTML = savedSurveys
+        .slice()
+        .reverse()
+        .map(
+          (item) => `
+          <tr class="hover:bg-slate-50">
+            <td class="py-3 px-3 font-extrabold text-navy-900">#${item.consecutivo}</td>
+            <td class="py-3 px-3 text-slate-600 text-xs sm:text-sm">${item.fechaHora}</td>
+            <td class="py-3 px-3 font-medium text-navy-800">${escapeHtml(item.tiempoAsistencia)}</td>
+            <td class="py-3 px-3">
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emeraldInst-100 text-emeraldInst-800">
+                ${escapeHtml(item.respuestas["7.1"] || "-")}
+              </span>
+            </td>
+            <td class="py-3 px-3 font-semibold text-slate-700">${escapeHtml(item.respuestas["7.2"] || "-")}</td>
+            <td class="py-3 px-3 text-right">
+              <button
+                type="button"
+                onclick="deleteSingleRecord('${item.id}')"
+                class="px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold cursor-pointer transition"
+                title="Eliminar este registro"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        `
+        )
+        .join("");
+    }
+
+    /**
+     * Elimina un registro individual por ID
+     */
+    window.deleteSingleRecord = function (id) {
+      savedSurveys = savedSurveys.filter((s) => s.id !== id);
+      persistSurveys();
+      updateUIState();
+      showToast("Registro eliminado correctamente.", "info");
+    };
+
+    /**
+     * Valida y guarda una encuesta completa
+     */
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+
+      // Limpiar mensajes de error previos
+      document.querySelectorAll("[id^='error-']").forEach((el) => el.classList.add("hidden"));
+      document.querySelectorAll("[id^='block-']").forEach((el) => el.classList.remove("ring-2", "ring-red-400"));
+
+      let firstInvalidElement = null;
+      let hasErrors = false;
+
+      // 1. Validar tiempo de asistencia
+      const tiempoInput = document.getElementById("tiempoAsistencia");
+      const tiempoVal = tiempoInput.value.trim();
+      if (!tiempoVal) {
+        document.getElementById("error-tiempoAsistencia").classList.remove("hidden");
+        firstInvalidElement = tiempoInput;
+        hasErrors = true;
+      }
+
+      // 2. Recopilar y validar preguntas de secciones 1 a 7
+      const respuestas = {};
+      SURVEY_SECTIONS.forEach((section) => {
+        section.questions.forEach((q) => {
+          const fieldName = `q_${q.id.replace(".", "_")}`;
+          const checked = document.querySelector(`input[name="${fieldName}"]:checked`);
+          const val = checked ? checked.value : (section.id === "sec3" ? "No aplica" : "");
+
+          respuestas[q.id] = val;
+
+          if (q.required && !val) {
+            const errEl = document.getElementById(`error-${fieldName}`);
+            const blockEl = document.getElementById(`block-${fieldName}`);
+            if (errEl) errEl.classList.remove("hidden");
+            if (blockEl) blockEl.classList.add("ring-2", "ring-red-400");
+            if (!firstInvalidElement) firstInvalidElement = blockEl;
+            hasErrors = true;
+          }
+        });
+      });
+
+      // 3. Validar Sección 8
+      const sugRadio = document.querySelector('input[name="tieneSugerencia"]:checked');
+      const tieneSugerencia = sugRadio ? sugRadio.value : "";
+      const cualSugerencia = document.getElementById("cualSugerencia").value.trim();
+
+      if (!tieneSugerencia) {
+        document.getElementById("error-tieneSugerencia").classList.remove("hidden");
+        if (!firstInvalidElement) firstInvalidElement = document.getElementById("error-tieneSugerencia");
+        hasErrors = true;
+      }
+
+      if (hasErrors) {
+        showToast("Por favor, complete los campos obligatorios marcados en rojo.", "error");
+        if (firstInvalidElement) {
+          firstInvalidElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
+
+      // Construir objeto de registro
+      const now = new Date();
+      const fechaHora = now.toLocaleString("es-CO", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+
+      const nextConsecutive = savedSurveys.length > 0 ? Math.max(...savedSurveys.map((s) => s.consecutivo)) + 1 : 1;
+
+      const record = {
+        id: "enc_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+        consecutivo: nextConsecutive,
+        fechaHora,
+        tiempoAsistencia: tiempoVal,
+        respuestas,
+        tieneSugerencia,
+        cualSugerencia: tieneSugerencia === "Si" ? (cualSugerencia || "Sin detalle escrito") : "No aplica"
+      };
+
+      // Guardar localmente
+      savedSurveys.push(record);
+      persistSurveys();
+      updateUIState();
+
+      // Enviar a la nube si está configurado
+      if (cloudConfig.enabled) {
+        sendToCloud(record);
+      }
+
+      // Limpiar formulario y volver arriba
+      resetSurveyForm();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast(`¡Encuesta #${record.consecutivo} guardada con éxito! Lista para el siguiente usuario.`, "success");
+    }
+
+    /**
+     * Envía una encuesta a Google Apps Script o Google Forms
+     */
+    async function sendToCloud(record) {
+      try {
+        if (cloudConfig.mode === "appsScript" && cloudConfig.appsScriptUrl) {
+          const flatPayload = buildFlatRecordForExport(record);
+          await fetch(cloudConfig.appsScriptUrl, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(flatPayload)
+          });
+          showToast("Copia enviada a Google Sheets.", "info");
+        } else if (cloudConfig.mode === "googleForm" && cloudConfig.googleFormUrl) {
+          const formData = new URLSearchParams();
+          const entries = cloudConfig.entries || {};
+
+          if (entries.tiempoAsistencia) formData.append(entries.tiempoAsistencia, record.tiempoAsistencia);
+          Object.keys(record.respuestas).forEach((qId) => {
+            if (entries[qId] && record.respuestas[qId]) {
+              formData.append(entries[qId], record.respuestas[qId]);
+            }
+          });
+          if (entries.tieneSugerencia) formData.append(entries.tieneSugerencia, record.tieneSugerencia);
+          if (entries.cualSugerencia) formData.append(entries.cualSugerencia, record.cualSugerencia);
+
+          await fetch(cloudConfig.googleFormUrl, {
+            method: "POST",
+            mode: "no-cors",
+            body: formData
+          });
+          showToast("Copia enviada a Google Forms.", "info");
+        }
+      } catch (err) {
+        console.error("Error enviando a la nube:", err);
+        showToast("Guardado localmente, pero falló el envío a la nube.", "error");
+      }
+    }
+
+    /**
+     * Limpia el formulario para el siguiente encuestado
+     */
+    function resetSurveyForm() {
+      document.getElementById("surveyForm").reset();
+      document.querySelectorAll("[id^='error-']").forEach((el) => el.classList.add("hidden"));
+      document.querySelectorAll("[id^='block-']").forEach((el) => el.classList.remove("ring-2", "ring-red-400"));
+      const sugWrapper = document.getElementById("sugerenciaTextoWrapper");
+      sugWrapper.classList.remove("ring-2", "ring-emeraldInst-600", "p-4", "rounded-xl", "bg-emeraldInst-50/40");
+    }
+
+    /**
+     * Construye un objeto plano con nombres de columnas legibles para Excel / Sheets
+     */
+    function buildFlatRecordForExport(record) {
+      const row = {
+        "Consecutivo": record.consecutivo,
+        "Fecha y Hora": record.fechaHora,
+        "Tiempo de asistencia": record.tiempoAsistencia
+      };
+
+      SURVEY_SECTIONS.forEach((sec) => {
+        sec.questions.forEach((q) => {
+          const colName = `${q.id} ${q.text}`;
+          row[colName] = record.respuestas[q.id] || "";
+        });
+      });
+
+      row["8. ¿Tiene alguna sugerencia?"] = record.tieneSugerencia;
+      row["8. ¿Cuál sugerencia?"] = record.cualSugerencia;
+      return row;
+    }
+
+    /**
+     * EXPORTACIÓN REAL A EXCEL (.xlsx) CON DOS HOJAS:
+     * Hoja 1: Base de Datos de Encuestas
+     * Hoja 2: Resumen Estadístico Automático
+     */
+    function exportToExcel() {
+      if (savedSurveys.length === 0) {
+        showToast("No hay encuestas guardadas todavía para exportar a Excel.", "error");
+        return;
+      }
+
+      if (typeof XLSX === "undefined") {
+        showToast("La librería de Excel aún está cargando. Intente de nuevo en un segundo.", "error");
+        return;
+      }
+
+      // 1. Preparar datos para la Hoja 1 (Registros individuales)
+      const rowsData = savedSurveys.map((rec) => buildFlatRecordForExport(rec));
+      const wsData = XLSX.utils.json_to_sheet(rowsData);
+
+      // Ajustar ancho de columnas en Hoja 1
+      const colKeys = Object.keys(rowsData[0]);
+      wsData["!cols"] = colKeys.map((key) => ({
+        wch: Math.min(Math.max(key.length + 4, 16), 48)
+      }));
+
+      // 2. Preparar datos para la Hoja 2 (Resumen Estadístico)
+      const summaryRows = [
+        ["PROGRAMA CENTRO DÍA/VIDA – SANTA ROSA DE CABAL"],
+        ["RESUMEN ESTADÍSTICO DE SATISFACCIÓN DEL USUARIO (2025)"],
+        [`Total de encuestas procesadas: ${savedSurveys.length}`],
+        [],
+        ["Sección / Ítem", "Aspecto Evaluado", "Muy malo", "Malo", "Aceptable", "Bueno", "Excelente", "No aplica", "SI", "NO", "Si (Recom.)", "No (Recom.)", "No sabe", "No contesta"]
+      ];
+
+      SURVEY_SECTIONS.forEach((sec) => {
+        sec.questions.forEach((q) => {
+          const counts = {
+            "Muy malo": 0,
+            "Malo": 0,
+            "Aceptable": 0,
+            "Bueno": 0,
+            "Excelente": 0,
+            "No aplica": 0,
+            "SI": 0,
+            "NO": 0,
+            "Si": 0,
+            "No": 0,
+            "No sabe": 0,
+            "No contesta": 0
+          };
+
+          savedSurveys.forEach((rec) => {
+            const ans = rec.respuestas[q.id];
+            if (ans && counts.hasOwnProperty(ans)) {
+              counts[ans]++;
+            }
+          });
+
+          summaryRows.push([
+            q.id,
+            q.text,
+            counts["Muy malo"],
+            counts["Malo"],
+            counts["Aceptable"],
+            counts["Bueno"],
+            counts["Excelente"],
+            counts["No aplica"],
+            counts["SI"],
+            counts["NO"],
+            counts["Si"],
+            counts["No"],
+            counts["No sabe"],
+            counts["No contesta"]
+          ]);
+        });
+      });
+
+      const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+      wsSummary["!cols"] = [
+        { wch: 12 },
+        { wch: 62 },
+        { wch: 11 },
+        { wch: 9 },
+        { wch: 11 },
+        { wch: 9 },
+        { wch: 11 },
+        { wch: 11 },
+        { wch: 8 },
+        { wch: 8 },
+        { wch: 11 },
+        { wch: 11 },
+        { wch: 10 },
+        { wch: 12 }
+      ];
+
+      // Crear libro de trabajo y descargar
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, wsData, "Encuestas");
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen Estadistico");
+
+      XLSX.writeFile(wb, "Encuestas_Centro_Dia_Vida_2025.xlsx");
+      showToast(`Archivo Excel generado con ${savedSurveys.length} encuesta(s).`, "success");
+    }
+
+    /**
+     * Exporta respaldo en formato JSON
+     */
+    function exportToJsonBackup() {
+      if (savedSurveys.length === 0) {
+        showToast("No hay encuestas para respaldar.", "error");
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedSurveys, null, 2));
+      const dlAnchor = document.createElement("a");
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `Respaldo_Encuestas_Centro_Dia_Vida_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+      showToast("Respaldo JSON descargado.", "success");
+    }
+
+    /**
+     * Muestra notificaciones visuales amigables (sin alert())
+     */
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+
+      let bgStyle = "bg-navy-800 text-white border-navy-700";
+      if (type === "success") bgStyle = "bg-emeraldInst-700 text-white border-emeraldInst-800";
+      if (type === "error") bgStyle = "bg-red-700 text-white border-red-800";
+
+      toast.className = `toast-animate pointer-events-auto px-4 py-3.5 rounded-xl shadow-xl border ${bgStyle} text-sm sm:text-base font-semibold flex items-center justify-between gap-3`;
+      toast.innerHTML = `
+        <span>${escapeHtml(message)}</span>
+        <button type="button" class="text-white/80 hover:text-white font-bold text-lg leading-none cursor-pointer" onclick="this.parentElement.remove()">×</button>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+      }, 4500);
+    }
+
+    /**
+     * Escapa HTML para prevenir inyección en tablas y mensajes
+     */
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    /**
+     * Enlaza todos los eventos de botones, modales y controles
+     */
+    function bindEvents() {
+      // Envío del formulario
+      document.getElementById("surveyForm").addEventListener("submit", handleFormSubmit);
+
+      // Limpiar formulario
+      document.getElementById("btnResetForm").addEventListener("click", () => {
+        resetSurveyForm();
+        showToast("Formulario limpiado.", "info");
+      });
+
+      // Resaltar campo de texto de sugerencia al marcar 'Sí'
+      document.querySelectorAll('input[name="tieneSugerencia"]').forEach((radio) => {
+        radio.addEventListener("change", (e) => {
+          const wrapper = document.getElementById("sugerenciaTextoWrapper");
+          const textarea = document.getElementById("cualSugerencia");
+          if (e.target.value === "Si") {
+            wrapper.classList.add("ring-2", "ring-emeraldInst-600", "p-4", "rounded-xl", "bg-emeraldInst-50/40");
+            textarea.focus();
+          } else {
+            wrapper.classList.remove("ring-2", "ring-emeraldInst-600", "p-4", "rounded-xl", "bg-emeraldInst-50/40");
+          }
+        });
+      });
+
+      // Exportar Excel (Header y Modal)
+      document.getElementById("btnExportExcel").addEventListener("click", exportToExcel);
+      document.getElementById("btnModalExportExcel").addEventListener("click", exportToExcel);
+
+      // Exportar JSON
+      document.getElementById("btnExportJson").addEventListener("click", exportToJsonBackup);
+
+      // Modal Registros
+      const modalRecords = document.getElementById("modalRecords");
+      document.getElementById("btnOpenRecords").addEventListener("click", () => {
+        document.getElementById("confirmClearBanner").classList.add("hidden");
+        modalRecords.classList.remove("hidden");
+        modalRecords.classList.add("flex");
+      });
+      document.getElementById("btnCloseRecords").addEventListener("click", () => {
+        modalRecords.classList.add("hidden");
+        modalRecords.classList.remove("flex");
+      });
+
+      // Vaciar base local con banner de confirmación
+      document.getElementById("btnClearAllRecords").addEventListener("click", () => {
+        if (savedSurveys.length === 0) {
+          showToast("La base local ya está vacía.", "info");
+          return;
+        }
+        document.getElementById("confirmClearBanner").classList.remove("hidden");
+      });
+      document.getElementById("btnCancelClear").addEventListener("click", () => {
+        document.getElementById("confirmClearBanner").classList.add("hidden");
+      });
+      document.getElementById("btnConfirmClear").addEventListener("click", () => {
+        savedSurveys = [];
+        persistSurveys();
+        updateUIState();
+        document.getElementById("confirmClearBanner").classList.add("hidden");
+        showToast("Todos los registros locales han sido eliminados.", "info");
+      });
+
+      // Modal Google Forms / Sheets
+      const modalCloud = document.getElementById("modalCloud");
+      document.getElementById("btnOpenCloud").addEventListener("click", () => {
+        document.getElementById("cloudEnabled").checked = cloudConfig.enabled;
+        document.getElementById("appsScriptUrl").value = cloudConfig.appsScriptUrl || "";
+        document.getElementById("googleFormUrl").value = cloudConfig.googleFormUrl || "";
+        switchCloudTab(cloudConfig.mode || "appsScript");
+        modalCloud.classList.remove("hidden");
+        modalCloud.classList.add("flex");
+      });
+
+      const closeCloudModal = () => {
+        modalCloud.classList.add("hidden");
+        modalCloud.classList.remove("flex");
+      };
+      document.getElementById("btnCloseCloud").addEventListener("click", closeCloudModal);
+      document.getElementById("btnCancelCloud").addEventListener("click", closeCloudModal);
+
+      // Tabs dentro del modal de nube
+      document.getElementById("tabAppsScript").addEventListener("click", () => switchCloudTab("appsScript"));
+      document.getElementById("tabGoogleForm").addEventListener("click", () => switchCloudTab("googleForm"));
+
+      // Copiar código de Apps Script
+      document.getElementById("btnCopyScript").addEventListener("click", () => {
+        const text = document.getElementById("appsScriptSnippet").textContent;
+        const tempInput = document.createElement("textarea");
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        tempInput.remove();
+        showToast("Código de Apps Script copiado al portapapeles.", "success");
+      });
+
+      // Guardar configuración de nube
+      document.getElementById("btnSaveCloudConfig").addEventListener("click", () => {
+        const enabled = document.getElementById("cloudEnabled").checked;
+        const appsScriptUrl = document.getElementById("appsScriptUrl").value.trim();
+        const googleFormUrl = document.getElementById("googleFormUrl").value.trim();
+
+        const entries = {};
+        document.querySelectorAll(".cloud-entry-input").forEach((inp) => {
+          const val = inp.value.trim();
+          if (val) entries[inp.dataset.entryKey] = val;
+        });
+
+        cloudConfig = {
+          ...cloudConfig,
+          enabled,
+          appsScriptUrl,
+          googleFormUrl,
+          entries
+        };
+
+        localStorage.setItem(STORAGE_KEY_CLOUD, JSON.stringify(cloudConfig));
+        updateUIState();
+        closeCloudModal();
+        showToast("Configuración de Google Forms / Sheets guardada.", "success");
+      });
+    }
+
+    /**
+     * Cambia entre pestaña Apps Script y Google Forms en el modal de nube
+     */
+    function switchCloudTab(mode) {
+      cloudConfig.mode = mode;
+      const tabAS = document.getElementById("tabAppsScript");
+      const tabGF = document.getElementById("tabGoogleForm");
+      const panelAS = document.getElementById("panelAppsScript");
+      const panelGF = document.getElementById("panelGoogleForm");
+
+      if (mode === "appsScript") {
+        tabAS.className = "p-3.5 rounded-xl border-2 border-emeraldInst-600 bg-emeraldInst-50 text-left cursor-pointer";
+        tabGF.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-white text-left cursor-pointer";
+        panelAS.classList.remove("hidden");
+        panelGF.classList.add("hidden");
+      } else {
+        tabGF.className = "p-3.5 rounded-xl border-2 border-emeraldInst-600 bg-emeraldInst-50 text-left cursor-pointer";
+        tabAS.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-white text-left cursor-pointer";
+        panelGF.classList.remove("hidden");
+        panelAS.classList.add("hidden");
+      }
+    }
+  </script>
+</body>
+</html>
