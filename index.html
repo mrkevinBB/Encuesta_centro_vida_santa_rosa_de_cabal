@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Encuesta de Satisfacción - Programa Centro Día/Vida - Santa Rosa de Cabal</title>
+  <title>Encuesta de Satisfacción 2026 - Programa Centro Día/Vida - Santa Rosa de Cabal</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- SheetJS para exportación real a Excel (.xlsx) -->
@@ -97,21 +97,30 @@
     }
 
     .option-pill[data-val="Malo"] input[type="radio"]:checked + label {
-      border-color: #c2410c;
-      background-color: #ea580c;
-      box-shadow: 0 4px 10px rgba(234, 88, 12, 0.25);
-    }
-
-    .option-pill[data-val="Aceptable"] input[type="radio"]:checked + label {
-      border-color: #b45309;
-      background-color: #d97706;
-      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.25);
+      border-color: #b91c1c;
+      background-color: #dc2626;
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
     }
 
     .option-pill[data-val="Bueno"] input[type="radio"]:checked + label {
       border-color: #0369a1;
       background-color: #0284c7;
       box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+    }
+
+    .option-pill[data-val="Excelente"] input[type="radio"]:checked + label,
+    .option-pill[data-val="SI"] input[type="radio"]:checked + label,
+    .option-pill[data-val="Si"] input[type="radio"]:checked + label {
+      border-color: #047857;
+      background-color: #047857;
+      box-shadow: 0 4px 10px rgba(4, 120, 87, 0.25);
+    }
+
+    .option-pill[data-val="NO"] input[type="radio"]:checked + label,
+    .option-pill[data-val="No"] input[type="radio"]:checked + label {
+      border-color: #b45309;
+      background-color: #d97706;
+      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.25);
     }
 
     .option-pill[data-val="No aplica"] input[type="radio"]:checked + label {
@@ -153,7 +162,7 @@
         </div>
         <div>
           <span class="text-xs uppercase tracking-wider text-emerald-300 font-bold block">Santa Rosa de Cabal</span>
-          <span class="text-sm sm:text-base font-bold leading-tight">Centro Día/Vida · Encuesta</span>
+          <span class="text-sm sm:text-base font-bold leading-tight">Centro Día/Vida · Encuesta 2026</span>
         </div>
       </div>
 
@@ -187,20 +196,24 @@
           <span>Descargar Excel (.xlsx)</span>
         </button>
 
-        <!-- Botón Configuración Google Forms / Sheets -->
+        <!-- Botón Configuración Google Sheets -->
         <button
           type="button"
           id="btnOpenCloud"
           class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition cursor-pointer"
-          title="Conectar con Google Forms o Google Sheets"
+          title="Configurar conexión con Google Sheets (Apps Script)"
         >
           <svg class="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
           </svg>
-          <span class="hidden md:inline">Google Forms / Sheets</span>
-          <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-slate-400" title="Sin conexión a la nube"></span>
+          <span class="hidden md:inline">Google Sheets</span>
+          <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-slate-400" title="Solo almacenamiento local"></span>
         </button>
       </div>
+    </div>
+    <!-- Barra de progreso de diligenciamiento -->
+    <div class="w-full h-1.5 bg-navy-800">
+      <div id="progressBar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 0%"></div>
     </div>
   </header>
 
@@ -249,6 +262,14 @@
           placeholder="Ejemplo: 6 meses, 2 años, 3 semanas..."
           class="w-full text-lg px-4 py-3.5 rounded-xl border-2 border-slate-300 focus:border-emeraldInst-600 focus:ring-4 focus:ring-emeraldInst-600/15 outline-none transition bg-slate-50 focus:bg-white text-navy-900 font-medium"
         />
+        <!-- Atajos rápidos opcionales para agilizar en campo -->
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-semibold text-slate-500">Sugerencias rápidas:</span>
+          <button type="button" data-quick-time="Menos de 6 meses" class="quick-time-btn px-3 py-1 rounded-lg bg-slate-100 hover:bg-emeraldInst-50 hover:text-emeraldInst-800 border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer transition">Menos de 6 meses</button>
+          <button type="button" data-quick-time="6 meses a 1 año" class="quick-time-btn px-3 py-1 rounded-lg bg-slate-100 hover:bg-emeraldInst-50 hover:text-emeraldInst-800 border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer transition">6 meses a 1 año</button>
+          <button type="button" data-quick-time="1 a 3 años" class="quick-time-btn px-3 py-1 rounded-lg bg-slate-100 hover:bg-emeraldInst-50 hover:text-emeraldInst-800 border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer transition">1 a 3 años</button>
+          <button type="button" data-quick-time="Más de 3 años" class="quick-time-btn px-3 py-1 rounded-lg bg-slate-100 hover:bg-emeraldInst-50 hover:text-emeraldInst-800 border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer transition">Más de 3 años</button>
+        </div>
         <p id="error-tiempoAsistencia" class="hidden mt-2 text-sm font-semibold text-red-600">
           Por favor, escriba cuánto tiempo lleva asistiendo al Centro Día/Vida.
         </p>
@@ -261,7 +282,7 @@
       <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="bg-navy-800 px-6 py-4 text-white">
           <h3 class="text-lg sm:text-xl font-bold leading-snug">
-            8. ¿Tiene alguna sugerencia para mejorar el servicio prestado en el Centro Día/Vida? <span class="text-emerald-300">*</span>
+            8. ¿Tiene alguna sugerencia para mejorar el servicio prestado en el Centro Día/Vida? Aparte de las ya expuestas anteriormente <span class="text-emerald-300">*</span>
           </h3>
         </div>
         <div class="p-6 sm:p-8 space-y-5">
@@ -349,8 +370,14 @@
       <div class="px-6 py-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
         <div class="text-sm font-bold text-navy-800">
           Total acumulado: <span id="modalTotalCount" class="text-emeraldInst-700 text-base">0</span> encuestas
+          <span id="modalPendingCountBadge" class="hidden ml-2 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+            0 pendientes por subir
+          </span>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btnSyncPending" class="hidden px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-bold cursor-pointer transition">
+            Sincronizar pendientes
+          </button>
           <button type="button" id="btnExportJson" class="px-3.5 py-2 rounded-xl bg-navy-700 hover:bg-navy-800 text-white text-xs sm:text-sm font-semibold cursor-pointer transition">
             Respaldo JSON
           </button>
@@ -397,6 +424,7 @@
                 <th class="py-3 px-3">Tiempo Asistencia</th>
                 <th class="py-3 px-3">Valoración General</th>
                 <th class="py-3 px-3">¿Recomienda?</th>
+                <th class="py-3 px-3">Google Sheets</th>
                 <th class="py-3 px-3 text-right">Acción</th>
               </tr>
             </thead>
@@ -408,15 +436,15 @@
   </div>
 
   <!-- ======================================================================= -->
-  <!-- MODAL 2: CONEXIÓN CON GOOGLE FORMS / GOOGLE SHEETS                      -->
+  <!-- MODAL 2: CONEXIÓN CON GOOGLE SHEETS (APPS SCRIPT)                       -->
   <!-- ======================================================================= -->
   <div id="modalCloud" class="fixed inset-0 z-50 hidden items-center justify-center bg-navy-900/70 backdrop-blur-sm p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
       <!-- Header Modal -->
       <div class="bg-navy-800 text-white px-6 py-4 flex items-center justify-between">
         <div>
-          <h3 class="text-lg sm:text-xl font-bold">Conexión con Google Forms / Google Sheets</h3>
-          <p class="text-xs sm:text-sm text-slate-300">Envíe automáticamente cada encuesta a la nube además de guardarla localmente.</p>
+          <h3 class="text-lg sm:text-xl font-bold">Conexión con Google Sheets (Apps Script)</h3>
+          <p class="text-xs sm:text-sm text-slate-300">Centralice todas las encuestas de los distintos celulares en una sola hoja de cálculo en tiempo real.</p>
         </div>
         <button type="button" id="btnCloseCloud" class="p-2 rounded-lg hover:bg-white/10 text-white cursor-pointer" aria-label="Cerrar">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -426,12 +454,12 @@
       </div>
 
       <!-- Cuerpo Modal -->
-      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      <div class="flex-1 overflow-y-auto p-6 space-y-5">
         <!-- Switch activar/desactivar -->
         <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200">
           <div>
-            <p class="font-bold text-navy-900">Sincronización automática en la nube</p>
-            <p class="text-xs text-slate-600">Al guardar una encuesta, se enviará una copia a su enlace configurado.</p>
+            <p class="font-bold text-navy-900">Sincronización automática con Google Sheets</p>
+            <p class="text-xs text-slate-600">Al pulsar "Guardar Encuesta", se enviará una fila nueva a su hoja de cálculo.</p>
           </div>
           <label class="inline-flex items-center cursor-pointer">
             <input type="checkbox" id="cloudEnabled" class="sr-only peer" />
@@ -439,99 +467,70 @@
           </label>
         </div>
 
-        <!-- Selector de modo -->
+        <!-- Campo URL de Apps Script -->
         <div>
-          <label class="block text-sm font-bold text-navy-900 mb-2">Método de integración:</label>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button type="button" id="tabAppsScript" class="p-3.5 rounded-xl border-2 border-emeraldInst-600 bg-emeraldInst-50 text-left cursor-pointer">
-              <span class="font-bold text-navy-900 block text-sm">Opción A: Google Sheets (Apps Script)</span>
-              <span class="text-xs text-slate-600">Recomendado. Guarda todas las columnas directamente en una hoja de cálculo.</span>
-            </button>
-            <button type="button" id="tabGoogleForm" class="p-3.5 rounded-xl border-2 border-slate-200 bg-white text-left cursor-pointer">
-              <span class="font-bold text-navy-900 block text-sm">Opción B: Google Forms (formResponse)</span>
-              <span class="text-xs text-slate-600">Envía los datos directamente a un formulario de Google existente.</span>
-            </button>
-          </div>
+          <label for="appsScriptUrl" class="block text-sm font-bold text-navy-900 mb-1.5">
+            URL de la Aplicación Web de Google Apps Script (terminada en <code>/exec</code>):
+          </label>
+          <input
+            type="url"
+            id="appsScriptUrl"
+            placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+            class="w-full px-3.5 py-3 rounded-xl border-2 border-slate-300 focus:border-emeraldInst-600 outline-none text-sm font-medium"
+          />
         </div>
 
-        <!-- PANEL OPCIÓN A: APPS SCRIPT -->
-        <div id="panelAppsScript" class="space-y-4">
-          <div>
-            <label for="appsScriptUrl" class="block text-sm font-bold text-navy-900 mb-1">
-              URL de la Aplicación Web (Google Apps Script):
-            </label>
-            <input
-              type="url"
-              id="appsScriptUrl"
-              placeholder="https://script.google.com/macros/s/AKfycb.../exec"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-emeraldInst-600 outline-none text-sm"
-            />
-          </div>
+        <!-- Guía paso a paso y código listo para copiar -->
+        <div class="bg-navy-50 rounded-xl p-4 sm:p-5 border border-navy-100 text-sm space-y-3">
+          <p class="font-bold text-navy-900">
+            Código para pegar en Google Sheets → Extensiones → Apps Script:
+          </p>
+          <div class="relative">
+            <pre id="appsScriptSnippet" class="bg-navy-900 text-emerald-300 p-3.5 rounded-xl text-xs overflow-x-auto leading-relaxed">function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheets()[0];
+    const data = JSON.parse(e.postData.contents || '{}');
+    data.recibido_en_sheets = new Date();
 
-          <details class="bg-navy-50 rounded-xl p-4 border border-navy-100 text-sm">
-            <summary class="font-bold text-navy-800 cursor-pointer">
-              Ver guía rápida: ¿Cómo crear el enlace de Google Sheets en 2 minutos?
-            </summary>
-            <ol class="list-decimal list-inside mt-3 space-y-2 text-slate-700 text-xs sm:text-sm">
-              <li>Abra una hoja de cálculo nueva en <strong>Google Sheets</strong>.</li>
-              <li>En el menú superior vaya a <strong>Extensiones → Apps Script</strong>.</li>
-              <li>Borre el código existente y pegue el siguiente código:</li>
-            </ol>
-            <div class="relative mt-2">
-              <pre id="appsScriptSnippet" class="bg-navy-900 text-emerald-300 p-3 rounded-lg text-xs overflow-x-auto">function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  var keys = Object.keys(data);
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(keys);
+    const incomingKeys = Object.keys(data);
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(incomingKeys);
+    }
+
+    let headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    incomingKeys.forEach((key) => {
+      if (!headers.includes(key)) {
+        headers.push(key);
+        sheet.getRange(1, headers.length).setValue(key);
+      }
+    });
+
+    const row = headers.map((h) => (data[h] !== undefined && data[h] !== null ? data[h] : ''));
+    sheet.appendRow(row);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
   }
-  var row = keys.map(function(k) { return data[k]; });
-  sheet.appendRow(row);
-  return ContentService.createTextOutput(JSON.stringify({status: "ok"}))
-    .setMimeType(ContentService.MimeType.JSON);
 }</pre>
-              <button type="button" id="btnCopyScript" class="mt-2 px-3 py-1.5 rounded-lg bg-navy-700 hover:bg-navy-800 text-white text-xs font-semibold cursor-pointer">
-                Copiar código de Apps Script
-              </button>
-            </div>
-            <ol start="4" class="list-decimal list-inside mt-3 space-y-1.5 text-slate-700 text-xs sm:text-sm">
-              <li>Haga clic en <strong>Implementar → Nueva implementación</strong>, elija tipo <strong>Aplicación web</strong>.</li>
-              <li>En "Quién tiene acceso", seleccione <strong>Cualquier persona</strong> y autorice los permisos.</li>
-              <li>Copie la URL generada (termina en <code>/exec</code>) y péguela arriba.</li>
-            </ol>
-          </details>
-        </div>
-
-        <!-- PANEL OPCIÓN B: GOOGLE FORMS -->
-        <div id="panelGoogleForm" class="hidden space-y-4">
-          <div>
-            <label for="googleFormUrl" class="block text-sm font-bold text-navy-900 mb-1">
-              URL de envío de Google Form (terminada en <code>/formResponse</code>):
-            </label>
-            <input
-              type="url"
-              id="googleFormUrl"
-              placeholder="https://docs.google.com/forms/d/e/1FAIpQLSc.../formResponse"
-              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-emeraldInst-600 outline-none text-sm"
-            />
+            <button type="button" id="btnCopyScript" class="mt-2.5 px-3.5 py-2 rounded-lg bg-navy-700 hover:bg-navy-800 text-white text-xs font-bold cursor-pointer transition">
+              Copiar código de Apps Script
+            </button>
           </div>
-
-          <details class="bg-navy-50 rounded-xl p-4 border border-navy-100 text-sm">
-            <summary class="font-bold text-navy-800 cursor-pointer">
-              ¿Cómo obtener la URL y los IDs (entry.XXXXX) de mi Google Form?
-            </summary>
-            <ul class="list-disc list-inside mt-2 space-y-1.5 text-slate-700 text-xs sm:text-sm">
-              <li>Abra su Google Form en modo edición, haga clic en los <strong>3 puntos (⋮) → Obtener enlace prellenado</strong>.</li>
-              <li>Llene respuestas de ejemplo y pulse <strong>Obtener enlace → Copiar enlace</strong>.</li>
-              <li>En ese enlace verá parámetros como <code>entry.123456789=Respuesta</code>.</li>
-              <li>Cambie <code>/viewform</code> por <code>/formResponse</code> en la URL principal y asigne cada <code>entry.XXXXX</code> abajo.</li>
-            </ul>
-          </details>
-
-          <div class="border border-slate-200 rounded-xl p-4 max-h-64 overflow-y-auto space-y-3 bg-slate-50">
-            <p class="text-xs font-bold text-navy-800 uppercase">Mapeo de campos (entry.ID):</p>
-            <div id="googleFormEntriesContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-          </div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-700 text-xs">
+            <li>En Apps Script, haz clic en <strong>Implementar → Nueva implementación</strong>.</li>
+            <li>Elige tipo <strong>Aplicación web</strong>, ejecutar como <strong>Yo</strong> y acceso para <strong>Cualquier persona</strong>.</li>
+            <li>Copia la URL generada (<code>/exec</code>), pégala arriba y guarda.</li>
+          </ol>
         </div>
       </div>
 
@@ -548,15 +547,22 @@
   </div>
 
   <!-- ======================================================================= -->
-  <!-- LÓGICA JAVASCRIPT DE LA APLICACIÓN                                      -->
+  <!-- LÓGICA JAVASCRIPT DE LA APLICACIÓN (ENCUESTA 2026 + GOOGLE SHEETS)      -->
   <!-- ======================================================================= -->
   <script>
     /**
-     * DEFINICIÓN ESTRUCTURADA DE LA ENCUESTA
-     * Contiene todas las secciones, preguntas y escalas exactas solicitadas.
+     * OPCIONAL: Si deseas dejar fija la URL de tu Google Apps Script en el código
+     * para que todos los celulares la tengan configurada automáticamente al abrir la página,
+     * pégala aquí entre las comillas (ej: "https://script.google.com/macros/s/AKfycb.../exec").
      */
-    const SCALE_STANDARD = ["Muy malo", "Malo", "Aceptable", "Bueno", "Excelente"];
-    const SCALE_TRANSPORT = ["Muy malo", "Malo", "Aceptable", "Bueno", "Excelente", "No aplica"];
+    const DEFAULT_APPS_SCRIPT_URL = "";
+
+    /**
+     * DEFINICIÓN ESTRUCTURADA DE LA ENCUESTA 2026
+     * Escala de 3 niveles: Malo, Bueno, Excelente (más "No aplica" opcional en Transporte).
+     */
+    const SCALE_STANDARD = ["Malo", "Bueno", "Excelente"];
+    const SCALE_TRANSPORT = ["Malo", "Bueno", "Excelente", "No aplica"];
     const SCALE_YES_NO = ["SI", "NO"];
     const SCALE_RECOMMEND = ["Si", "No", "No sabe", "No contesta"];
 
@@ -564,21 +570,19 @@
       {
         id: "sec1",
         title: "1. Según su percepción, califique los siguientes aspectos referentes a la sede del Centro de Día/Vida",
-        subtitle: "Califique cada aspecto de Muy malo a Excelente.",
+        subtitle: "Califique cada aspecto como Malo, Bueno o Excelente.",
         options: SCALE_STANDARD,
         questions: [
           { id: "1.1", text: "Orden y limpieza.", required: true },
-          { id: "1.2", text: "Equipamiento y confortabilidad de las instalaciones.", required: true },
-          { id: "1.3", text: "Organización y funcionamiento.", required: true },
-          { id: "1.4", text: "Horario de atención.", required: true },
-          { id: "1.5", text: "Medidas de seguridad para el ingreso y la salida.", required: true },
-          { id: "1.6", text: "Protección y seguridad que el centro ofrece.", required: true }
+          { id: "1.2", text: "Organización y funcionamiento.", required: true },
+          { id: "1.3", text: "Horario de atención.", required: true },
+          { id: "1.4", text: "Medidas de seguridad para el ingreso y la salida.", required: true }
         ]
       },
       {
         id: "sec2",
         title: "2. Califique los siguientes aspectos relacionados con el talento humano que interviene en la prestación de los servicios en el Centro de Día/Vida",
-        subtitle: "Califique cada aspecto de Muy malo a Excelente.",
+        subtitle: "Califique cada aspecto como Malo, Bueno o Excelente.",
         options: SCALE_STANDARD,
         questions: [
           { id: "2.1", text: "Trato respetuoso y amable.", required: true },
@@ -590,22 +594,18 @@
       {
         id: "sec3",
         title: "3. Califique los siguientes aspectos relacionados con el servicio de transporte del Centro de Día/Vida",
-        subtitle: "Si el usuario no utiliza el servicio de transporte, puede marcar 'No aplica' o dejar esta sección sin responder.",
+        subtitle: "Si el usuario no utiliza el servicio de transporte, marque 'No aplica' o déjelo sin responder.",
         options: SCALE_TRANSPORT,
         questions: [
-          { id: "3.1", text: "Duración de la ruta (el tiempo que pasa en el vehículo).", required: false },
-          { id: "3.2", text: "Horario de recogida.", required: false },
-          { id: "3.3", text: "Estado del vehículo (limpieza, mantenimiento).", required: false },
-          { id: "3.4", text: "Seguridad durante el recorrido.", required: false },
-          { id: "3.5", text: "Adaptación y accesibilidad para abordar el vehículo.", required: false },
-          { id: "3.6", text: "Trato y actitud del personal de la ruta (conductor y coordinador de ruta).", required: false },
-          { id: "3.7", text: "El servicio del transporte en general.", required: false }
+          { id: "3.1", text: "Adaptación y accesibilidad para abordar el vehículo.", required: false },
+          { id: "3.2", text: "Trato y actitud del personal de la ruta (conductor y coordinador de ruta).", required: false },
+          { id: "3.3", text: "El servicio del transporte en general.", required: false }
         ]
       },
       {
         id: "sec4",
         title: "4. Califique los siguientes aspectos relacionados con el servicio de alimentación del Centro de Día/Vida",
-        subtitle: "Califique cada aspecto de Muy malo a Excelente.",
+        subtitle: "Califique cada aspecto como Malo, Bueno o Excelente.",
         options: SCALE_STANDARD,
         questions: [
           { id: "4.1", text: "La alimentación que se ofrece (variedad del menú, sabor, presentación, cantidad).", required: true },
@@ -616,19 +616,18 @@
       {
         id: "sec5",
         title: "5. Indique su calificación para los siguientes aspectos referentes a la intervención y atención del usuario del programa Centro Día/Vida",
-        subtitle: "Califique cada aspecto de Muy malo a Excelente.",
+        subtitle: "Califique cada aspecto como Malo, Bueno o Excelente.",
         options: SCALE_STANDARD,
         questions: [
           { id: "5.1", text: "Atención y cuidados de la salud (orientación de enfermería, asesoría médica, seguimiento al estado de salud, articulación con el sistema de salud).", required: true },
-          { id: "5.2", text: "Atención psicológica.", required: true },
-          { id: "5.3", text: "Atención y orientación psicosocial.", required: true },
-          { id: "5.4", text: "Actividad física (gimnasia diaria de mantenimiento y fortalecimiento, hidroterapia, caminata, club deportivo, talleres educativos teórico - prácticos).", required: true },
-          { id: "5.5", text: "Actividades sociales, culturales y recreativas.", required: true },
-          { id: "5.6", text: "Actividades productivas (manualidades, huerta, medio ambiente).", required: true },
-          { id: "5.7", text: "Actividades pedagógicas en nuevas tecnologías de la información (internet, uso del celular).", required: true },
-          { id: "5.8", text: "Talleres educativos ofrecidos por el talento humano.", required: true },
-          { id: "5.9", text: "Encuentros intergeneracionales y encuentros de familia.", required: true },
-          { id: "5.10", text: "Redes para el apoyo (voluntariado, bazar, canasta de la solidaridad, alimentación complementaria).", required: true }
+          { id: "5.2", text: "Atención y orientación psicosocial.", required: true },
+          { id: "5.3", text: "Actividad física (gimnasia diaria de mantenimiento y fortalecimiento, hidroterapia, caminata, club deportivo, talleres educativos teórico - prácticos).", required: true },
+          { id: "5.4", text: "Actividades sociales, culturales y recreativas.", required: true },
+          { id: "5.5", text: "Actividades productivas (manualidades, huerta, medio ambiente).", required: true },
+          { id: "5.6", text: "Actividades pedagógicas en nuevas tecnologías de la información (internet, uso del celular).", required: true },
+          { id: "5.7", text: "Talleres educativos ofrecidos por el talento humano.", required: true },
+          { id: "5.8", text: "Encuentros intergeneracionales y encuentros de familia.", required: true },
+          { id: "5.9", text: "Redes para el apoyo (voluntariado, bazar, canasta de la solidaridad, alimentación complementaria).", required: true }
         ]
       },
       {
@@ -652,7 +651,7 @@
         id: "sec7",
         title: "7. De acuerdo con la experiencia que ha tenido como usuario del Centro Día/Vida, califique en general el servicio.",
         subtitle: "Valoración global y recomendación del programa.",
-        options: null, // Opciones personalizadas por pregunta en esta sección
+        options: null,
         questions: [
           {
             id: "7.1",
@@ -670,20 +669,17 @@
       }
     ];
 
-    // Claves de almacenamiento en localStorage
-    const STORAGE_KEY_RECORDS = "centro_dia_vida_encuestas_2025";
-    const STORAGE_KEY_CLOUD = "centro_dia_vida_cloud_config_2025";
+    // Claves independientes para la versión 2026
+    const STORAGE_KEY_RECORDS = "encuestas_centro_dia_vida_2026";
+    const STORAGE_KEY_CLOUD = "centro_dia_vida_cloud_config_2026";
 
     /**
      * ESTADO GLOBAL DE LA APLICACIÓN
      */
     let savedSurveys = [];
     let cloudConfig = {
-      enabled: false,
-      mode: "appsScript", // 'appsScript' | 'googleForm'
-      appsScriptUrl: "",
-      googleFormUrl: "",
-      entries: {}
+      enabled: Boolean(DEFAULT_APPS_SCRIPT_URL),
+      appsScriptUrl: DEFAULT_APPS_SCRIPT_URL
     };
 
     /**
@@ -692,13 +688,13 @@
     document.addEventListener("DOMContentLoaded", () => {
       loadFromStorage();
       renderSurveySections();
-      renderGoogleFormEntryInputs();
       updateUIState();
+      updateProgressBar();
       bindEvents();
     });
 
     /**
-     * Carga encuestas y configuración de nube desde localStorage
+     * Carga encuestas y configuración de Google Sheets desde localStorage
      */
     function loadFromStorage() {
       try {
@@ -714,10 +710,14 @@
       try {
         const rawCloud = localStorage.getItem(STORAGE_KEY_CLOUD);
         if (rawCloud) {
-          cloudConfig = { ...cloudConfig, ...JSON.parse(rawCloud) };
+          const parsed = JSON.parse(rawCloud);
+          cloudConfig = {
+            enabled: parsed.enabled !== undefined ? parsed.enabled : Boolean(DEFAULT_APPS_SCRIPT_URL),
+            appsScriptUrl: parsed.appsScriptUrl || DEFAULT_APPS_SCRIPT_URL
+          };
         }
       } catch (e) {
-        console.error("Error leyendo configuración de nube:", e);
+        console.error("Error leyendo configuración de Google Sheets:", e);
       }
     }
 
@@ -733,7 +733,7 @@
     }
 
     /**
-     * Renderiza dinámicamente las secciones 1 a 7 con controles accesibles
+     * Renderiza dinámicamente las secciones 1 a 7 con botones grandes y accesibles
      */
     function renderSurveySections() {
       const container = document.getElementById("sectionsContainer");
@@ -743,7 +743,6 @@
         const sectionEl = document.createElement("section");
         sectionEl.className = "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden";
 
-        // Encabezado de sección
         const headerHtml = `
           <div class="bg-navy-800 px-6 py-4 text-white">
             <h3 class="text-lg sm:text-xl font-bold leading-snug">${section.title}</h3>
@@ -751,7 +750,6 @@
           </div>
         `;
 
-        // Cuerpo de preguntas
         let questionsHtml = `<div class="divide-y divide-slate-200">`;
 
         section.questions.forEach((q, idx) => {
@@ -759,11 +757,10 @@
           const fieldName = `q_${q.id.replace(".", "_")}`;
           const bgClass = idx % 2 === 1 ? "bg-slate-50/60" : "bg-white";
 
-          // Definir columnas de rejilla según cantidad de opciones
-          let gridColsClass = "grid-cols-2 sm:grid-cols-5";
+          // Rejilla adaptada a 2, 3 o 4 columnas según las opciones 2026
+          let gridColsClass = "grid-cols-3 sm:max-w-lg";
           if (opts.length === 2) gridColsClass = "grid-cols-2 sm:max-w-xs";
-          else if (opts.length === 4) gridColsClass = "grid-cols-2 sm:grid-cols-4";
-          else if (opts.length === 6) gridColsClass = "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6";
+          else if (opts.length === 4) gridColsClass = "grid-cols-2 sm:grid-cols-4 sm:max-w-2xl";
 
           const pillsHtml = opts
             .map((opt, optIdx) => {
@@ -803,39 +800,30 @@
     }
 
     /**
-     * Genera los inputs para mapear entry.IDs de Google Forms en el modal de nube
+     * Calcula y actualiza la barra superior de progreso mientras se diligencia
      */
-    function renderGoogleFormEntryInputs() {
-      const container = document.getElementById("googleFormEntriesContainer");
-      const allFields = [
-        { key: "tiempoAsistencia", label: "Tiempo de asistencia" }
-      ];
-
+    function updateProgressBar() {
+      const requiredFields = ["tiempoAsistencia", "tieneSugerencia"];
       SURVEY_SECTIONS.forEach((sec) => {
         sec.questions.forEach((q) => {
-          allFields.push({ key: q.id, label: `${q.id} ${q.text.substring(0, 42)}...` });
+          if (q.required) requiredFields.push(`q_${q.id.replace(".", "_")}`);
         });
       });
 
-      allFields.push({ key: "tieneSugerencia", label: "8. ¿Tiene sugerencia? (Si/No)" });
-      allFields.push({ key: "cualSugerencia", label: "8. ¿Cuál sugerencia?" });
+      let answered = 0;
+      if (document.getElementById("tiempoAsistencia").value.trim().length > 0) answered++;
+      if (document.querySelector('input[name="tieneSugerencia"]:checked')) answered++;
 
-      container.innerHTML = allFields
-        .map(
-          (f) => `
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 truncate mb-1" title="${f.label}">${f.label}</label>
-            <input
-              type="text"
-              data-entry-key="${f.key}"
-              value="${cloudConfig.entries[f.key] || ""}"
-              placeholder="entry.123456789"
-              class="cloud-entry-input w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white"
-            />
-          </div>
-        `
-        )
-        .join("");
+      SURVEY_SECTIONS.forEach((sec) => {
+        sec.questions.forEach((q) => {
+          if (q.required && document.querySelector(`input[name="q_${q.id.replace(".", "_")}"]:checked`)) {
+            answered++;
+          }
+        });
+      });
+
+      const pct = Math.round((answered / requiredFields.length) * 100);
+      document.getElementById("progressBar").style.width = `${pct}%`;
     }
 
     /**
@@ -849,11 +837,25 @@
       const nextConsecutive = count > 0 ? Math.max(...savedSurveys.map((s) => s.consecutivo)) + 1 : 1;
       document.getElementById("currentSurveyNumber").textContent = `Encuesta N.° ${nextConsecutive}`;
 
-      // Estado visual de nube
+      // Pendientes de sincronizar con Google Sheets
+      const pendingCount = savedSurveys.filter((s) => !s.sincronizado).length;
+      const pendingBadge = document.getElementById("modalPendingCountBadge");
+      const btnSyncPending = document.getElementById("btnSyncPending");
+
+      if (pendingCount > 0 && cloudConfig.enabled && cloudConfig.appsScriptUrl) {
+        pendingBadge.textContent = `${pendingCount} pendiente(s) por subir`;
+        pendingBadge.classList.remove("hidden");
+        btnSyncPending.classList.remove("hidden");
+      } else {
+        pendingBadge.classList.add("hidden");
+        btnSyncPending.classList.add("hidden");
+      }
+
+      // Estado visual de Google Sheets en header
       const dot = document.getElementById("cloudStatusDot");
-      if (cloudConfig.enabled && (cloudConfig.appsScriptUrl || cloudConfig.googleFormUrl)) {
+      if (cloudConfig.enabled && cloudConfig.appsScriptUrl) {
         dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/40";
-        dot.title = "Sincronización en la nube activa";
+        dot.title = "Conectado a Google Sheets";
       } else {
         dot.className = "w-2.5 h-2.5 rounded-full bg-slate-400";
         dot.title = "Solo almacenamiento local";
@@ -895,6 +897,13 @@
               </span>
             </td>
             <td class="py-3 px-3 font-semibold text-slate-700">${escapeHtml(item.respuestas["7.2"] || "-")}</td>
+            <td class="py-3 px-3">
+              ${
+                item.sincronizado
+                  ? '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Enviado</span>'
+                  : '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Local</span>'
+              }
+            </td>
             <td class="py-3 px-3 text-right">
               <button
                 type="button"
@@ -922,12 +931,79 @@
     };
 
     /**
+     * FUNCIÓN DE INTEGRACIÓN CON GOOGLE SHEETS (GOOGLE APPS SCRIPT doPost)
+     * Envía una encuesta a la URL de Apps Script usando text/plain para evitar bloqueos CORS.
+     */
+    async function enviarAGoogleSheets(datosEncuesta) {
+      const targetUrl = (cloudConfig.appsScriptUrl || DEFAULT_APPS_SCRIPT_URL || "").trim();
+      if (!cloudConfig.enabled || !targetUrl) {
+        return { ok: false, reason: "not_configured" };
+      }
+
+      try {
+        const flatPayload = buildFlatRecordForExport(datosEncuesta);
+        await fetch(targetUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(flatPayload)
+        });
+        return { ok: true };
+      } catch (error) {
+        console.error("Error enviando a Google Sheets:", error);
+        return { ok: false, error };
+      }
+    }
+
+    /**
+     * Reenvía todas las encuestas locales que aún no han sido sincronizadas con Google Sheets
+     */
+    async function syncAllPendingToSheets() {
+      const targetUrl = (cloudConfig.appsScriptUrl || DEFAULT_APPS_SCRIPT_URL || "").trim();
+      if (!cloudConfig.enabled || !targetUrl) {
+        showToast("Primero configure y active la URL de Google Sheets.", "error");
+        return;
+      }
+
+      const pending = savedSurveys.filter((s) => !s.sincronizado);
+      if (pending.length === 0) {
+        showToast("Todas las encuestas ya están sincronizadas.", "info");
+        return;
+      }
+
+      const btn = document.getElementById("btnSyncPending");
+      btn.disabled = true;
+      btn.textContent = "Sincronizando...";
+
+      let syncedNow = 0;
+      for (const rec of pending) {
+        const res = await enviarAGoogleSheets(rec);
+        if (res.ok) {
+          rec.sincronizado = true;
+          syncedNow++;
+        }
+      }
+
+      persistSurveys();
+      updateUIState();
+      btn.disabled = false;
+      btn.textContent = "Sincronizar pendientes";
+
+      if (syncedNow > 0) {
+        showToast(`${syncedNow} encuesta(s) sincronizada(s) con Google Sheets.`, "success");
+      } else {
+        showToast("No se pudo conectar con Google Sheets. Verifique su conexión a internet.", "error");
+      }
+    }
+
+    /**
      * Valida y guarda una encuesta completa
      */
     async function handleFormSubmit(e) {
       e.preventDefault();
 
-      // Limpiar mensajes de error previos
       document.querySelectorAll("[id^='error-']").forEach((el) => el.classList.add("hidden"));
       document.querySelectorAll("[id^='block-']").forEach((el) => el.classList.remove("ring-2", "ring-red-400"));
 
@@ -983,7 +1059,6 @@
         return;
       }
 
-      // Construir objeto de registro
       const now = new Date();
       const fechaHora = now.toLocaleString("es-CO", {
         year: "numeric",
@@ -997,68 +1072,37 @@
       const nextConsecutive = savedSurveys.length > 0 ? Math.max(...savedSurveys.map((s) => s.consecutivo)) + 1 : 1;
 
       const record = {
-        id: "enc_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
+        id: "enc2026_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6),
         consecutivo: nextConsecutive,
         fechaHora,
         tiempoAsistencia: tiempoVal,
         respuestas,
         tieneSugerencia,
-        cualSugerencia: tieneSugerencia === "Si" ? (cualSugerencia || "Sin detalle escrito") : "No aplica"
+        cualSugerencia: tieneSugerencia === "Si" ? (cualSugerencia || "Sin detalle escrito") : "No aplica",
+        sincronizado: false
       };
 
-      // Guardar localmente
+      // 1. Guardar inmediatamente en localStorage
       savedSurveys.push(record);
       persistSurveys();
       updateUIState();
 
-      // Enviar a la nube si está configurado
-      if (cloudConfig.enabled) {
-        sendToCloud(record);
-      }
-
-      // Limpiar formulario y volver arriba
+      // 2. Limpiar formulario y subir scroll para agilizar siguiente encuesta
       resetSurveyForm();
       window.scrollTo({ top: 0, behavior: "smooth" });
-      showToast(`¡Encuesta #${record.consecutivo} guardada con éxito! Lista para el siguiente usuario.`, "success");
-    }
+      showToast(`¡Encuesta #${record.consecutivo} guardada localmente!`, "success");
 
-    /**
-     * Envía una encuesta a Google Apps Script o Google Forms
-     */
-    async function sendToCloud(record) {
-      try {
-        if (cloudConfig.mode === "appsScript" && cloudConfig.appsScriptUrl) {
-          const flatPayload = buildFlatRecordForExport(record);
-          await fetch(cloudConfig.appsScriptUrl, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(flatPayload)
-          });
-          showToast("Copia enviada a Google Sheets.", "info");
-        } else if (cloudConfig.mode === "googleForm" && cloudConfig.googleFormUrl) {
-          const formData = new URLSearchParams();
-          const entries = cloudConfig.entries || {};
-
-          if (entries.tiempoAsistencia) formData.append(entries.tiempoAsistencia, record.tiempoAsistencia);
-          Object.keys(record.respuestas).forEach((qId) => {
-            if (entries[qId] && record.respuestas[qId]) {
-              formData.append(entries[qId], record.respuestas[qId]);
-            }
-          });
-          if (entries.tieneSugerencia) formData.append(entries.tieneSugerencia, record.tieneSugerencia);
-          if (entries.cualSugerencia) formData.append(entries.cualSugerencia, record.cualSugerencia);
-
-          await fetch(cloudConfig.googleFormUrl, {
-            method: "POST",
-            mode: "no-cors",
-            body: formData
-          });
-          showToast("Copia enviada a Google Forms.", "info");
+      // 3. Intentar enviar a Google Sheets si está configurado
+      if (cloudConfig.enabled && cloudConfig.appsScriptUrl) {
+        const result = await enviarAGoogleSheets(record);
+        if (result.ok) {
+          record.sincronizado = true;
+          persistSurveys();
+          updateUIState();
+          showToast(`Encuesta #${record.consecutivo} enviada a Google Sheets.`, "info");
+        } else {
+          showToast("Sin conexión a Google Sheets. Quedó pendiente para sincronizar luego.", "error");
         }
-      } catch (err) {
-        console.error("Error enviando a la nube:", err);
-        showToast("Guardado localmente, pero falló el envío a la nube.", "error");
       }
     }
 
@@ -1071,10 +1115,11 @@
       document.querySelectorAll("[id^='block-']").forEach((el) => el.classList.remove("ring-2", "ring-red-400"));
       const sugWrapper = document.getElementById("sugerenciaTextoWrapper");
       sugWrapper.classList.remove("ring-2", "ring-emeraldInst-600", "p-4", "rounded-xl", "bg-emeraldInst-50/40");
+      updateProgressBar();
     }
 
     /**
-     * Construye un objeto plano con nombres de columnas legibles para Excel / Sheets
+     * Construye un objeto plano con nombres de columnas legibles para Excel / Google Sheets
      */
     function buildFlatRecordForExport(record) {
       const row = {
@@ -1097,8 +1142,8 @@
 
     /**
      * EXPORTACIÓN REAL A EXCEL (.xlsx) CON DOS HOJAS:
-     * Hoja 1: Base de Datos de Encuestas
-     * Hoja 2: Resumen Estadístico Automático
+     * Hoja 1: Respuestas individuales
+     * Hoja 2: Resumen Estadístico con conteos y porcentajes
      */
     function exportToExcel() {
       if (savedSurveys.length === 0) {
@@ -1111,31 +1156,53 @@
         return;
       }
 
-      // 1. Preparar datos para la Hoja 1 (Registros individuales)
-      const rowsData = savedSurveys.map((rec) => buildFlatRecordForExport(rec));
+      // 1. Hoja 1: Respuestas
+      const rowsData = savedSurveys.map((rec) => {
+        const flat = buildFlatRecordForExport(rec);
+        flat["Sincronizado Google Sheets"] = rec.sincronizado ? "Sí" : "Pendiente";
+        return flat;
+      });
       const wsData = XLSX.utils.json_to_sheet(rowsData);
 
-      // Ajustar ancho de columnas en Hoja 1
       const colKeys = Object.keys(rowsData[0]);
       wsData["!cols"] = colKeys.map((key) => ({
         wch: Math.min(Math.max(key.length + 4, 16), 48)
       }));
 
-      // 2. Preparar datos para la Hoja 2 (Resumen Estadístico)
+      // 2. Hoja 2: Resumen Estadístico (Conteo y Porcentaje)
+      const total = savedSurveys.length;
       const summaryRows = [
         ["PROGRAMA CENTRO DÍA/VIDA – SANTA ROSA DE CABAL"],
-        ["RESUMEN ESTADÍSTICO DE SATISFACCIÓN DEL USUARIO (2025)"],
-        [`Total de encuestas procesadas: ${savedSurveys.length}`],
+        ["RESUMEN ESTADÍSTICO DE SATISFACCIÓN DEL USUARIO (2026)"],
+        [`Total de encuestas procesadas: ${total}`],
         [],
-        ["Sección / Ítem", "Aspecto Evaluado", "Muy malo", "Malo", "Aceptable", "Bueno", "Excelente", "No aplica", "SI", "NO", "Si (Recom.)", "No (Recom.)", "No sabe", "No contesta"]
+        [
+          "Ítem",
+          "Aspecto Evaluado",
+          "Malo",
+          "% Malo",
+          "Bueno",
+          "% Bueno",
+          "Excelente",
+          "% Excelente",
+          "No aplica",
+          "SI",
+          "% SI",
+          "NO",
+          "% NO",
+          "Si (Recom.)",
+          "No (Recom.)",
+          "No sabe",
+          "No contesta"
+        ]
       ];
+
+      const pctStr = (val) => (total > 0 && val > 0 ? `${((val / total) * 100).toFixed(1)}%` : "0%");
 
       SURVEY_SECTIONS.forEach((sec) => {
         sec.questions.forEach((q) => {
           const counts = {
-            "Muy malo": 0,
             "Malo": 0,
-            "Aceptable": 0,
             "Bueno": 0,
             "Excelente": 0,
             "No aplica": 0,
@@ -1149,7 +1216,7 @@
 
           savedSurveys.forEach((rec) => {
             const ans = rec.respuestas[q.id];
-            if (ans && counts.hasOwnProperty(ans)) {
+            if (ans && Object.prototype.hasOwnProperty.call(counts, ans)) {
               counts[ans]++;
             }
           });
@@ -1157,14 +1224,17 @@
           summaryRows.push([
             q.id,
             q.text,
-            counts["Muy malo"],
             counts["Malo"],
-            counts["Aceptable"],
+            pctStr(counts["Malo"]),
             counts["Bueno"],
+            pctStr(counts["Bueno"]),
             counts["Excelente"],
+            pctStr(counts["Excelente"]),
             counts["No aplica"],
             counts["SI"],
+            pctStr(counts["SI"]),
             counts["NO"],
+            pctStr(counts["NO"]),
             counts["Si"],
             counts["No"],
             counts["No sabe"],
@@ -1175,28 +1245,30 @@
 
       const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
       wsSummary["!cols"] = [
-        { wch: 12 },
+        { wch: 10 },
         { wch: 62 },
-        { wch: 11 },
+        { wch: 8 },
+        { wch: 9 },
+        { wch: 8 },
         { wch: 9 },
         { wch: 11 },
+        { wch: 12 },
+        { wch: 11 },
+        { wch: 8 },
         { wch: 9 },
-        { wch: 11 },
-        { wch: 11 },
         { wch: 8 },
-        { wch: 8 },
-        { wch: 11 },
-        { wch: 11 },
+        { wch: 9 },
+        { wch: 12 },
+        { wch: 12 },
         { wch: 10 },
         { wch: 12 }
       ];
 
-      // Crear libro de trabajo y descargar
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, wsData, "Encuestas");
+      XLSX.utils.book_append_sheet(wb, wsData, "Respuestas");
       XLSX.utils.book_append_sheet(wb, wsSummary, "Resumen Estadistico");
 
-      XLSX.writeFile(wb, "Encuestas_Centro_Dia_Vida_2025.xlsx");
+      XLSX.writeFile(wb, "Encuestas_Centro_Dia_Vida_2026.xlsx");
       showToast(`Archivo Excel generado con ${savedSurveys.length} encuesta(s).`, "success");
     }
 
@@ -1211,7 +1283,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(savedSurveys, null, 2));
       const dlAnchor = document.createElement("a");
       dlAnchor.setAttribute("href", dataStr);
-      dlAnchor.setAttribute("download", `Respaldo_Encuestas_Centro_Dia_Vida_${new Date().toISOString().slice(0, 10)}.json`);
+      dlAnchor.setAttribute("download", `Respaldo_Encuestas_Centro_Dia_Vida_2026_${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(dlAnchor);
       dlAnchor.click();
       dlAnchor.remove();
@@ -1258,8 +1330,20 @@
      * Enlaza todos los eventos de botones, modales y controles
      */
     function bindEvents() {
-      // Envío del formulario
-      document.getElementById("surveyForm").addEventListener("submit", handleFormSubmit);
+      const form = document.getElementById("surveyForm");
+      form.addEventListener("submit", handleFormSubmit);
+      form.addEventListener("change", updateProgressBar);
+      document.getElementById("tiempoAsistencia").addEventListener("input", updateProgressBar);
+
+      // Sugerencias rápidas de tiempo de asistencia
+      document.querySelectorAll(".quick-time-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const inp = document.getElementById("tiempoAsistencia");
+          inp.value = btn.dataset.quickTime;
+          document.getElementById("error-tiempoAsistencia").classList.add("hidden");
+          updateProgressBar();
+        });
+      });
 
       // Limpiar formulario
       document.getElementById("btnResetForm").addEventListener("click", () => {
@@ -1284,6 +1368,9 @@
       // Exportar Excel (Header y Modal)
       document.getElementById("btnExportExcel").addEventListener("click", exportToExcel);
       document.getElementById("btnModalExportExcel").addEventListener("click", exportToExcel);
+
+      // Sincronizar pendientes
+      document.getElementById("btnSyncPending").addEventListener("click", syncAllPendingToSheets);
 
       // Exportar JSON
       document.getElementById("btnExportJson").addEventListener("click", exportToJsonBackup);
@@ -1319,13 +1406,11 @@
         showToast("Todos los registros locales han sido eliminados.", "info");
       });
 
-      // Modal Google Forms / Sheets
+      // Modal Google Sheets
       const modalCloud = document.getElementById("modalCloud");
       document.getElementById("btnOpenCloud").addEventListener("click", () => {
         document.getElementById("cloudEnabled").checked = cloudConfig.enabled;
         document.getElementById("appsScriptUrl").value = cloudConfig.appsScriptUrl || "";
-        document.getElementById("googleFormUrl").value = cloudConfig.googleFormUrl || "";
-        switchCloudTab(cloudConfig.mode || "appsScript");
         modalCloud.classList.remove("hidden");
         modalCloud.classList.add("flex");
       });
@@ -1336,10 +1421,6 @@
       };
       document.getElementById("btnCloseCloud").addEventListener("click", closeCloudModal);
       document.getElementById("btnCancelCloud").addEventListener("click", closeCloudModal);
-
-      // Tabs dentro del modal de nube
-      document.getElementById("tabAppsScript").addEventListener("click", () => switchCloudTab("appsScript"));
-      document.getElementById("tabGoogleForm").addEventListener("click", () => switchCloudTab("googleForm"));
 
       // Copiar código de Apps Script
       document.getElementById("btnCopyScript").addEventListener("click", () => {
@@ -1353,54 +1434,21 @@
         showToast("Código de Apps Script copiado al portapapeles.", "success");
       });
 
-      // Guardar configuración de nube
+      // Guardar configuración de Google Sheets
       document.getElementById("btnSaveCloudConfig").addEventListener("click", () => {
         const enabled = document.getElementById("cloudEnabled").checked;
         const appsScriptUrl = document.getElementById("appsScriptUrl").value.trim();
-        const googleFormUrl = document.getElementById("googleFormUrl").value.trim();
-
-        const entries = {};
-        document.querySelectorAll(".cloud-entry-input").forEach((inp) => {
-          const val = inp.value.trim();
-          if (val) entries[inp.dataset.entryKey] = val;
-        });
 
         cloudConfig = {
-          ...cloudConfig,
           enabled,
-          appsScriptUrl,
-          googleFormUrl,
-          entries
+          appsScriptUrl
         };
 
         localStorage.setItem(STORAGE_KEY_CLOUD, JSON.stringify(cloudConfig));
         updateUIState();
         closeCloudModal();
-        showToast("Configuración de Google Forms / Sheets guardada.", "success");
+        showToast("Configuración de Google Sheets guardada.", "success");
       });
-    }
-
-    /**
-     * Cambia entre pestaña Apps Script y Google Forms en el modal de nube
-     */
-    function switchCloudTab(mode) {
-      cloudConfig.mode = mode;
-      const tabAS = document.getElementById("tabAppsScript");
-      const tabGF = document.getElementById("tabGoogleForm");
-      const panelAS = document.getElementById("panelAppsScript");
-      const panelGF = document.getElementById("panelGoogleForm");
-
-      if (mode === "appsScript") {
-        tabAS.className = "p-3.5 rounded-xl border-2 border-emeraldInst-600 bg-emeraldInst-50 text-left cursor-pointer";
-        tabGF.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-white text-left cursor-pointer";
-        panelAS.classList.remove("hidden");
-        panelGF.classList.add("hidden");
-      } else {
-        tabGF.className = "p-3.5 rounded-xl border-2 border-emeraldInst-600 bg-emeraldInst-50 text-left cursor-pointer";
-        tabAS.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-white text-left cursor-pointer";
-        panelGF.classList.remove("hidden");
-        panelAS.classList.add("hidden");
-      }
     }
   </script>
 </body>
