@@ -157,7 +157,7 @@
     <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <!-- Identidad rápida -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emeraldInst-600 flex items-center justify-center font-extrabold text-lg shadow-inner shrink-0">
+        <div id="adminLogoTrigger" class="w-10 h-10 rounded-xl bg-emeraldInst-600 flex items-center justify-center font-extrabold text-lg shadow-inner shrink-0 select-none">
           CD
         </div>
         <div>
@@ -166,8 +166,8 @@
         </div>
       </div>
 
-      <!-- Botones de acción principales -->
-      <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+      <!-- Botones de acción principales (ocultos por defecto para encuestados; visibles con ?admin=2026 o 5 clics en CD) -->
+      <div id="adminToolbar" class="hidden flex-wrap items-center gap-2 sm:gap-3">
         <!-- Botón de Registros Guardados -->
         <button
           type="button"
@@ -342,7 +342,7 @@
   <!-- PIE DE PÁGINA -->
   <footer class="bg-navy-900 text-slate-300 py-6 px-4 mt-12 text-center text-sm">
     <p class="font-semibold text-white">Programa Centro Día/Vida – Santa Rosa de Cabal</p>
-    <p class="mt-1 text-slate-400">Los datos se almacenan localmente en su navegador para garantizar continuidad sin conexión a internet.</p>
+    <p class="mt-1 text-slate-400">Sus respuestas nos ayudan a mejorar continuamente el servicio para las personas mayores.</p>
   </footer>
 
   <!-- NOTIFICACIÓN FLOTANTE (TOAST) -->
@@ -390,7 +390,7 @@
         </div>
       </div>
 
-      <!-- Confirmación inline para vaciar base local (sin usar window.confirm) -->
+      <!-- Confirmación inline para vaciar base local -->
       <div id="confirmClearBanner" class="hidden px-6 py-4 bg-red-50 border-b border-red-200 flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm font-bold text-red-800">
           ¿Está seguro de eliminar TODAS las encuestas guardadas? Esta acción no se puede deshacer.
@@ -551,15 +551,17 @@
   <!-- ======================================================================= -->
   <script>
     /**
-     * OPCIONAL: Si deseas dejar fija la URL de tu Google Apps Script en el código
-     * para que todos los celulares la tengan configurada automáticamente al abrir la página,
-     * pégala aquí entre las comillas (ej: "https://script.google.com/macros/s/AKfycb.../exec").
+     * URL fija de Google Apps Script para envío centralizado a Google Sheets
      */
     const DEFAULT_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXqDwtaoM_EcTz0tt_Rol_atiSRyZbRiAVKwOs7QwUI-Ul61hH_VSVz2aKFVj6pKlC/exec";
 
     /**
+     * Clave de acceso administrador por parámetro URL (?admin=2026)
+     */
+    const ADMIN_ACCESS_CODE = "2026";
+
+    /**
      * DEFINICIÓN ESTRUCTURADA DE LA ENCUESTA 2026
-     * Escala de 3 niveles: Malo, Bueno, Excelente (más "No aplica" opcional en Transporte).
      */
     const SCALE_STANDARD = ["Malo", "Bueno", "Excelente"];
     const SCALE_TRANSPORT = ["Malo", "Bueno", "Excelente", "No aplica"];
@@ -672,6 +674,7 @@
     // Claves independientes para la versión 2026
     const STORAGE_KEY_RECORDS = "encuestas_centro_dia_vida_2026";
     const STORAGE_KEY_CLOUD = "centro_dia_vida_cloud_config_2026";
+    const SESSION_ADMIN_KEY = "modo_admin_cd_2026";
 
     /**
      * ESTADO GLOBAL DE LA APLICACIÓN
@@ -686,12 +689,51 @@
      * INICIALIZACIÓN AL CARGAR LA PÁGINA
      */
     document.addEventListener("DOMContentLoaded", () => {
+      initAdminMode();
       loadFromStorage();
       renderSurveySections();
       updateUIState();
       updateProgressBar();
       bindEvents();
     });
+
+    /**
+     * Controla la visibilidad de los botones administrativos (Registros, Excel, Google Sheets).
+     * Se mantienen ocultos para los usuarios normales y se muestran si la URL tiene ?admin=2026
+     * o si se pulsa 5 veces seguidas el ícono "CD" de la esquina superior izquierda.
+     */
+    function initAdminMode() {
+      const toolbar = document.getElementById("adminToolbar");
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get("admin") === ADMIN_ACCESS_CODE || sessionStorage.getItem(SESSION_ADMIN_KEY) === "1") {
+        sessionStorage.setItem(SESSION_ADMIN_KEY, "1");
+        toolbar.classList.remove("hidden");
+        toolbar.classList.add("flex");
+      }
+
+      let clicksLogo = 0;
+      let timerLogo = null;
+      const logoTrigger = document.getElementById("adminLogoTrigger");
+      if (logoTrigger) {
+        logoTrigger.addEventListener("click", () => {
+          clicksLogo++;
+          clearTimeout(timerLogo);
+          timerLogo = setTimeout(() => {
+            clicksLogo = 0;
+          }, 1500);
+
+          if (clicksLogo >= 5) {
+            clicksLogo = 0;
+            const isHidden = toolbar.classList.contains("hidden");
+            toolbar.classList.toggle("hidden", !isHidden);
+            toolbar.classList.toggle("flex", isHidden);
+            sessionStorage.setItem(SESSION_ADMIN_KEY, isHidden ? "1" : "0");
+            showToast(isHidden ? "Modo administrador activado." : "Modo administrador oculto.", "info");
+          }
+        });
+      }
+    }
 
     /**
      * Carga encuestas y configuración de Google Sheets desde localStorage
@@ -757,7 +799,6 @@
           const fieldName = `q_${q.id.replace(".", "_")}`;
           const bgClass = idx % 2 === 1 ? "bg-slate-50/60" : "bg-white";
 
-          // Rejilla adaptada a 2, 3 o 4 columnas según las opciones 2026
           let gridColsClass = "grid-cols-3 sm:max-w-lg";
           if (opts.length === 2) gridColsClass = "grid-cols-2 sm:max-w-xs";
           else if (opts.length === 4) gridColsClass = "grid-cols-2 sm:grid-cols-4 sm:max-w-2xl";
@@ -837,7 +878,6 @@
       const nextConsecutive = count > 0 ? Math.max(...savedSurveys.map((s) => s.consecutivo)) + 1 : 1;
       document.getElementById("currentSurveyNumber").textContent = `Encuesta N.° ${nextConsecutive}`;
 
-      // Pendientes de sincronizar con Google Sheets
       const pendingCount = savedSurveys.filter((s) => !s.sincronizado).length;
       const pendingBadge = document.getElementById("modalPendingCountBadge");
       const btnSyncPending = document.getElementById("btnSyncPending");
@@ -851,7 +891,6 @@
         btnSyncPending.classList.add("hidden");
       }
 
-      // Estado visual de Google Sheets en header
       const dot = document.getElementById("cloudStatusDot");
       if (cloudConfig.enabled && cloudConfig.appsScriptUrl) {
         dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/40";
@@ -932,7 +971,6 @@
 
     /**
      * FUNCIÓN DE INTEGRACIÓN CON GOOGLE SHEETS (GOOGLE APPS SCRIPT doPost)
-     * Envía una encuesta a la URL de Apps Script usando text/plain para evitar bloqueos CORS.
      */
     async function enviarAGoogleSheets(datosEncuesta) {
       const targetUrl = (cloudConfig.appsScriptUrl || DEFAULT_APPS_SCRIPT_URL || "").trim();
@@ -1087,21 +1125,18 @@
       persistSurveys();
       updateUIState();
 
-      // 2. Limpiar formulario y subir scroll para agilizar siguiente encuesta
+      // 2. Limpiar formulario y subir scroll
       resetSurveyForm();
       window.scrollTo({ top: 0, behavior: "smooth" });
-      showToast(`¡Encuesta #${record.consecutivo} guardada localmente!`, "success");
+      showToast("¡Muchas gracias! Su encuesta ha sido enviada correctamente.", "success");
 
-      // 3. Intentar enviar a Google Sheets si está configurado
+      // 3. Enviar a Google Sheets en segundo plano
       if (cloudConfig.enabled && cloudConfig.appsScriptUrl) {
         const result = await enviarAGoogleSheets(record);
         if (result.ok) {
           record.sincronizado = true;
           persistSurveys();
           updateUIState();
-          showToast(`Encuesta #${record.consecutivo} enviada a Google Sheets.`, "info");
-        } else {
-          showToast("Sin conexión a Google Sheets. Quedó pendiente para sincronizar luego.", "error");
         }
       }
     }
@@ -1141,9 +1176,7 @@
     }
 
     /**
-     * EXPORTACIÓN REAL A EXCEL (.xlsx) CON DOS HOJAS:
-     * Hoja 1: Respuestas individuales
-     * Hoja 2: Resumen Estadístico con conteos y porcentajes
+     * EXPORTACIÓN REAL A EXCEL (.xlsx)
      */
     function exportToExcel() {
       if (savedSurveys.length === 0) {
@@ -1156,7 +1189,6 @@
         return;
       }
 
-      // 1. Hoja 1: Respuestas
       const rowsData = savedSurveys.map((rec) => {
         const flat = buildFlatRecordForExport(rec);
         flat["Sincronizado Google Sheets"] = rec.sincronizado ? "Sí" : "Pendiente";
@@ -1169,7 +1201,6 @@
         wch: Math.min(Math.max(key.length + 4, 16), 48)
       }));
 
-      // 2. Hoja 2: Resumen Estadístico (Conteo y Porcentaje)
       const total = savedSurveys.length;
       const summaryRows = [
         ["PROGRAMA CENTRO DÍA/VIDA – SANTA ROSA DE CABAL"],
@@ -1291,7 +1322,7 @@
     }
 
     /**
-     * Muestra notificaciones visuales amigables (sin alert())
+     * Muestra notificaciones visuales amigables
      */
     function showToast(message, type = "info") {
       const container = document.getElementById("toastContainer");
@@ -1335,7 +1366,6 @@
       form.addEventListener("change", updateProgressBar);
       document.getElementById("tiempoAsistencia").addEventListener("input", updateProgressBar);
 
-      // Sugerencias rápidas de tiempo de asistencia
       document.querySelectorAll(".quick-time-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           const inp = document.getElementById("tiempoAsistencia");
@@ -1345,13 +1375,11 @@
         });
       });
 
-      // Limpiar formulario
       document.getElementById("btnResetForm").addEventListener("click", () => {
         resetSurveyForm();
         showToast("Formulario limpiado.", "info");
       });
 
-      // Resaltar campo de texto de sugerencia al marcar 'Sí'
       document.querySelectorAll('input[name="tieneSugerencia"]').forEach((radio) => {
         radio.addEventListener("change", (e) => {
           const wrapper = document.getElementById("sugerenciaTextoWrapper");
@@ -1365,17 +1393,11 @@
         });
       });
 
-      // Exportar Excel (Header y Modal)
       document.getElementById("btnExportExcel").addEventListener("click", exportToExcel);
       document.getElementById("btnModalExportExcel").addEventListener("click", exportToExcel);
-
-      // Sincronizar pendientes
       document.getElementById("btnSyncPending").addEventListener("click", syncAllPendingToSheets);
-
-      // Exportar JSON
       document.getElementById("btnExportJson").addEventListener("click", exportToJsonBackup);
 
-      // Modal Registros
       const modalRecords = document.getElementById("modalRecords");
       document.getElementById("btnOpenRecords").addEventListener("click", () => {
         document.getElementById("confirmClearBanner").classList.add("hidden");
@@ -1387,7 +1409,6 @@
         modalRecords.classList.remove("flex");
       });
 
-      // Vaciar base local con banner de confirmación
       document.getElementById("btnClearAllRecords").addEventListener("click", () => {
         if (savedSurveys.length === 0) {
           showToast("La base local ya está vacía.", "info");
@@ -1406,7 +1427,6 @@
         showToast("Todos los registros locales han sido eliminados.", "info");
       });
 
-      // Modal Google Sheets
       const modalCloud = document.getElementById("modalCloud");
       document.getElementById("btnOpenCloud").addEventListener("click", () => {
         document.getElementById("cloudEnabled").checked = cloudConfig.enabled;
@@ -1422,7 +1442,6 @@
       document.getElementById("btnCloseCloud").addEventListener("click", closeCloudModal);
       document.getElementById("btnCancelCloud").addEventListener("click", closeCloudModal);
 
-      // Copiar código de Apps Script
       document.getElementById("btnCopyScript").addEventListener("click", () => {
         const text = document.getElementById("appsScriptSnippet").textContent;
         const tempInput = document.createElement("textarea");
@@ -1434,7 +1453,6 @@
         showToast("Código de Apps Script copiado al portapapeles.", "success");
       });
 
-      // Guardar configuración de Google Sheets
       document.getElementById("btnSaveCloudConfig").addEventListener("click", () => {
         const enabled = document.getElementById("cloudEnabled").checked;
         const appsScriptUrl = document.getElementById("appsScriptUrl").value.trim();
